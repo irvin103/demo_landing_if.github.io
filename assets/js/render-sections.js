@@ -640,6 +640,8 @@ function bindOfertaModal() {
 
       const url = new URL(ctaLink.href, location.href);
       history.pushState(null, "", url.pathname + url.search + url.hash);
+      // pushState no dispara eventos: avisa al formulario del nuevo programa.
+      window.dispatchEvent(new Event("leadform:programa"));
 
       document.getElementById("lead-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
     }

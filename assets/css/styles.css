@@ -14,6 +14,16 @@ html {
   --chat--color-dark: #000b4d;
 }
 
+/* --- Formulario de contacto: aviso de estado (ver lead-form.js) -------- */
+#lead-form-el [data-status="ok"] {
+  background: #e7f6ee;
+  color: #14532d;
+}
+#lead-form-el [data-status="error"] {
+  background: #fdecec;
+  color: #991b1b;
+}
+
 /* --- Aparición al hacer scroll (ver initReveal en main.js) --------------- */
 [data-reveal] {
   opacity: 0;

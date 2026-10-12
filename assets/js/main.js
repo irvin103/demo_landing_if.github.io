@@ -1,3 +1,4 @@
+import { initLeadForm } from "./lead-form.js";
 import { renderOferta, renderPlanteles, renderPromos, renderOfertaNavMenu, renderProgramaDetalle, initComunidadDropdown } from "./render-sections.js";
 
 async function includePartials() {
@@ -99,6 +100,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   setActiveNavLink();
   initComunidadDropdown();
   initMobileMenu();
+  initLeadForm();
   initReveal();
 
   await Promise.allSettled([

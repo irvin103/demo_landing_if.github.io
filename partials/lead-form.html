@@ -1,24 +1,57 @@
 <section id="lead-form" class="py-16 bg-gray-100 dark:bg-gray-800 scroll-mt-24">
   <div class="container mx-auto px-4 lg:px-8">
     <div class="bg-surface-light dark:bg-surface-dark rounded-3xl shadow-xl overflow-hidden p-6 lg:p-10 flex flex-col lg:flex-row gap-10">
-      <div class="lg:w-1/2 flex flex-col gap-5">
+      <form id="lead-form-el" class="lg:w-1/2 flex flex-col gap-5" novalidate aria-labelledby="lead-form-title">
         <div>
-          <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Resuelve tus dudas</h2>
+          <h2 id="lead-form-title" class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Resuelve tus dudas</h2>
           <p class="text-sm text-secondary-text-light dark:text-secondary-text-dark mt-1">Escribe tu duda o sugerencia, en breve te atenderemos.</p>
         </div>
 
         <div class="flex flex-col gap-4">
-          <input class="w-full bg-background-light dark:bg-gray-700 border-0 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary dark:text-white" placeholder="Nombre" type="text" />
-          <input class="w-full bg-background-light dark:bg-gray-700 border-0 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary dark:text-white" placeholder="Teléfono" type="tel" />
-          <input class="w-full bg-background-light dark:bg-gray-700 border-0 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary dark:text-white" placeholder="Email" type="email" />
-          <textarea class="w-full bg-background-light dark:bg-gray-700 border-0 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary dark:text-white" placeholder="Quiero más información, contáctenme." rows="4"></textarea>
+          <div data-field>
+            <label for="lf-nombre" class="sr-only">Nombre</label>
+            <input id="lf-nombre" name="nombre" class="w-full bg-background-light dark:bg-gray-700 border-0 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary dark:text-white" placeholder="Nombre" type="text" autocomplete="name" required />
+            <p data-error hidden class="text-xs text-red-600 mt-1"></p>
+          </div>
+          <div data-field>
+            <label for="lf-telefono" class="sr-only">Teléfono (opcional)</label>
+            <input id="lf-telefono" name="telefono" class="w-full bg-background-light dark:bg-gray-700 border-0 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary dark:text-white" placeholder="Teléfono" type="tel" autocomplete="tel" inputmode="tel" />
+            <p data-error hidden class="text-xs text-red-600 mt-1"></p>
+          </div>
+          <div data-field>
+            <label for="lf-email" class="sr-only">Email</label>
+            <input id="lf-email" name="email" class="w-full bg-background-light dark:bg-gray-700 border-0 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary dark:text-white" placeholder="Email" type="email" autocomplete="email" required />
+            <p data-error hidden class="text-xs text-red-600 mt-1"></p>
+          </div>
+          <div data-field>
+            <label for="lf-mensaje" class="sr-only">Mensaje</label>
+            <textarea id="lf-mensaje" name="mensaje" class="w-full bg-background-light dark:bg-gray-700 border-0 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary dark:text-white" placeholder="Quiero más información, contáctenme." rows="4"></textarea>
+          </div>
+
+          <input type="hidden" name="programa" />
+          <input type="hidden" name="nivel" />
+          <!-- Campo trampa para bots: oculto a las personas y a lectores de pantalla. -->
+          <div class="hidden" aria-hidden="true">
+            <label for="lf-empresa">Empresa</label>
+            <input id="lf-empresa" name="empresa" type="text" tabindex="-1" autocomplete="off" />
+          </div>
+
+          <div data-field>
+            <label class="flex items-start gap-2 text-xs text-secondary-text-light dark:text-secondary-text-dark">
+              <input id="lf-consentimiento" name="consentimiento" type="checkbox" class="mt-0.5 rounded border-gray-300 text-primary focus:ring-primary" required />
+              <span>Acepto el <a href="aviso-privacidad.html" class="text-primary font-semibold hover:underline" target="_blank" rel="noopener">aviso de privacidad</a> y que me contacten para darme información.</span>
+            </label>
+            <p data-error hidden class="text-xs text-red-600 mt-1"></p>
+          </div>
         </div>
 
-        <button type="button" class="w-full bg-gray-700 hover:bg-gray-900 dark:bg-gray-600 dark:hover:bg-gray-500 text-white font-bold py-4 rounded-lg flex items-center justify-center gap-2 transition-colors mt-2">
+        <button type="submit" class="w-full bg-gray-700 hover:bg-gray-900 dark:bg-gray-600 dark:hover:bg-gray-500 text-white font-bold py-4 rounded-lg flex items-center justify-center gap-2 transition-colors mt-2 disabled:opacity-60">
           Enviar
-          <span class="material-icons">chevron_right</span>
+          <span class="material-icons" aria-hidden="true">chevron_right</span>
         </button>
-      </div>
+
+        <p data-status hidden role="status" aria-live="polite" class="text-sm rounded-lg px-4 py-3 bg-background-light dark:bg-gray-700 text-gray-700 dark:text-gray-200"></p>
+      </form>
 
       <div class="lg:w-1/2 flex items-center justify-center">
         <div class="w-full max-w-[280px] aspect-[9/16] rounded-xl overflow-hidden shadow-lg bg-black">
