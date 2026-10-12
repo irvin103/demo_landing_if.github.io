@@ -78,6 +78,18 @@ Ese mismo dato se consume en **tres lugares** distintos de `render-sections.js`:
 2. **Menú del nav** (`renderOfertaNavMenu`) — al pasar el cursor sobre "Oferta Educativa" se despliega un submenú con los 4 niveles; al pasar el cursor sobre un nivel, se cargan bajo demanda sus programas desde `data/oferta/<nivel>.json` y cada uno enlaza a su página dedicada (`<id>.html`).
 3. **Páginas de programa** (`renderProgramaDetalle`) — cada una de las 19 páginas raíz (`bachillerato-gastronomia.html`, etc.) marca `<body data-nivel="..." data-programa-id="...">`; esa función lee esos atributos, busca el programa correspondiente y arma: imagen principal (con marco e iniciales/ícono como respaldo si la foto no existe — ver `HERO_IMAGE_TIERS`, tamaños ajustados según la resolución real de cada foto) y 5 pestañas verticales (Resumen, Modalidad y Horarios, Requisitos, Te ofrecemos, Planteles).
 
+## Animaciones de entrada
+
+Las secciones aparecen al hacer scroll sin cambiar el diseño: solo se agregan atributos `data-*` a los partials, y `assets/js/main.js` (`initReveal`) más `assets/css/styles.css` hacen el resto.
+
+- `data-reveal`: el elemento sube y aparece al entrar en pantalla (una sola vez).
+- `data-reveal-stagger`: lo mismo para cada hijo directo, escalonado cada 80 ms (incluye las tarjetas que se pintan después desde los JSON).
+- `data-reveal-line`: las líneas decorativas de los títulos crecen desde el centro.
+- `data-countup`: la cifra cuenta desde 0 hasta su valor ("+3042", "+3,000", "14"); el texto final es siempre el original.
+- `data-hero-zoom`: la foto del hero entra con un leve acercamiento.
+
+Duraciones y curvas viven en variables CSS (`--motion-enter`, `--motion-stagger`, `--motion-ease-out`, …). Se animan solo `opacity`, `translate` y `scale` con `@keyframes` para no interferir con los hover de Tailwind. Con "reducir movimiento" activado en el sistema, todo se muestra de inmediato sin animación.
+
 ## Ejecutar el proyecto localmente
 
 Al usar `fetch` para cargar partials y JSON, el sitio debe servirse por HTTP:

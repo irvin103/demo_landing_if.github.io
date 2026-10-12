@@ -5,6 +5,16 @@ html {
 /* Widget de chat (@n8n/chat): mismos colores que el tema de Tailwind.
    Los nombres de variables son los de @n8n/chat 1.x (ojo: "--color--primary"
    lleva doble guion). */
+/* Valores de movimiento compartidos (entradas: 500-800 ms, salida suave
+   tipo ease-out-quint; sin rebotes). */
+:root {
+  --motion-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-enter: 0.65s;
+  --motion-stagger: 80ms;
+  --motion-distance: 20px;
+}
+
 :root {
   --chat--color--primary: #001590;
   --chat--color--primary-shade-50: #000f6b;
@@ -103,7 +113,7 @@ html {
   line-height: 1.35;
   box-shadow: 0 10px 30px -8px rgba(0, 11, 77, 0.35);
   transform-origin: 100% 100%;
-  animation: bubble-entra 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both,
+  animation: bubble-entra 0.5s var(--motion-ease-expo) both,
     bubble-flota 5s ease-in-out 0.6s infinite;
 }
 /* Colita del globo apuntando al botón. */
@@ -170,16 +180,38 @@ html {
   color: #991b1b;
 }
 
-/* --- Aparición al hacer scroll (ver initReveal en main.js) --------------- */
-[data-reveal] {
+/* --- Animaciones de entrada (ver initReveal en main.js) -----------------
+   - [data-reveal]: el elemento sube y aparece al entrar en pantalla.
+   - [data-reveal-stagger]: lo mismo para cada hijo directo, escalonado
+     (--reveal-i lo asigna main.js, también a los hijos que llegan después).
+   - [data-reveal-line]: las líneas de los títulos crecen desde el centro.
+   Se usan @keyframes con `translate`/`scale` (no `transform` ni
+   `transition`) para no chocar con los hover de Tailwind de las tarjetas;
+   `backwards` devuelve cada elemento a sus estilos originales al terminar. */
+[data-reveal]:not(.is-visible),
+[data-reveal-stagger]:not(.is-visible) > * {
   opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
-  transition-delay: var(--reveal-delay, 0ms);
 }
-[data-reveal].is-visible {
-  opacity: 1;
-  transform: none;
+[data-reveal].is-visible,
+[data-reveal-stagger].is-visible > * {
+  animation: reveal-up var(--motion-enter) var(--motion-ease-out) backwards;
+  animation-delay: calc(var(--reveal-delay, 0ms) + var(--reveal-i, 0) * var(--motion-stagger));
+}
+.is-visible [data-reveal-line] {
+  animation: reveal-line 0.8s var(--motion-ease-expo) 0.15s backwards;
+}
+[data-hero-zoom] {
+  animation: hero-zoom 1.6s var(--motion-ease-out) backwards;
+}
+
+@keyframes reveal-up {
+  from { opacity: 0; translate: 0 var(--motion-distance); }
+}
+@keyframes reveal-line {
+  from { scale: 0 1; }
+}
+@keyframes hero-zoom {
+  from { scale: 1.06; }
 }
 
 /* --- Franja de certificación (red CONOCER + IMIFLE) --------------------- */
@@ -226,8 +258,7 @@ html {
   border-radius: 9999px;
   background: linear-gradient(to bottom, transparent, #e01c26, #001590, transparent);
   transform: scaleY(0);
-  opacity: 1;
-  transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms);
+  transition: transform 0.9s var(--motion-ease-out) var(--reveal-delay, 0ms);
 }
 .cert-divider.is-visible {
   transform: scaleY(1);
@@ -243,9 +274,17 @@ html {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-reveal],
-  .cert-divider {
+  [data-reveal]:not(.is-visible),
+  [data-reveal-stagger]:not(.is-visible) > * {
     opacity: 1;
+  }
+  [data-reveal].is-visible,
+  [data-reveal-stagger].is-visible > *,
+  .is-visible [data-reveal-line],
+  [data-hero-zoom] {
+    animation: none;
+  }
+  .cert-divider {
     transform: none;
     transition: none;
   }
