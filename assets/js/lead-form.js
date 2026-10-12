@@ -1,10 +1,11 @@
 // Formulario "Resuelve tus dudas" (partials/lead-form.html).
 //
-// Envío: si FORM_CONFIG.endpoint tiene una URL (p. ej. el webhook de un flujo
-// de n8n que reenvía el correo a inscripciones@), se manda ahí como JSON. Si
-// está vacío —o el envío falla— se abre la app de correo del visitante con el
-// mensaje ya escrito para FORM_CONFIG.destinatario, así el formulario siempre
-// tiene una forma de llegar al instituto aunque todavía no haya backend.
+// Envío: FORM_CONFIG.endpoint es la URL de la aplicación web de Google Apps
+// Script (backend/apps-script/Code.gs), que guarda la solicitud en una hoja y
+// manda el correo a inscripciones@. El JSON va como text/plain porque Apps
+// Script no responde la verificación previa (preflight) de CORS. Mientras el
+// endpoint esté vacío, se abre la app de correo del visitante con el mensaje
+// ya escrito para FORM_CONFIG.destinatario.
 //
 // Programa de interés: las páginas de programa enlazan a
 // index.html?programa=<id>&nivel=<nivel>#lead-form; aquí se lee esa URL y se
@@ -12,7 +13,7 @@
 // recargar, y avisa con el evento "leadform:programa".
 
 const FORM_CONFIG = {
-  // URL del webhook que recibe el formulario (POST JSON). Vacío = solo correo.
+  // URL de la aplicación web de Apps Script (termina en /exec). Vacío = solo correo.
   endpoint: "",
   destinatario: "inscripciones@institutofleming.com",
   asunto: "Solicitud de información desde el sitio web",
@@ -82,13 +83,28 @@ function abrirCorreo(d) {
   location.href = `mailto:${FORM_CONFIG.destinatario}?subject=${encodeURIComponent(FORM_CONFIG.asunto)}&body=${encodeURIComponent(body)}`;
 }
 
-function mostrarEstado(form, tipo, texto) {
+// `conCorreo` agrega un enlace para escribir directo al instituto.
+function mostrarEstado(form, tipo, texto, conCorreo = false) {
   const box = form.querySelector("[data-status]");
   if (!box) return;
   box.dataset.status = tipo;
   box.textContent = texto;
+  if (conCorreo) {
+    const a = document.createElement("a");
+    a.href = `mailto:${FORM_CONFIG.destinatario}`;
+    a.textContent = FORM_CONFIG.destinatario;
+    a.className = "font-semibold underline";
+    box.append(" ", a, ".");
+  }
   box.hidden = false;
 }
+
+const MENSAJES_ERROR = {
+  limite: "Ya recibimos un mensaje tuyo hace un momento. Si necesitas agregar algo, espera un minuto o escríbenos a",
+  email: "Revisa tu correo electrónico e inténtalo de nuevo.",
+  nombre: "Revisa tu nombre e inténtalo de nuevo.",
+  telefono: "Revisa tu teléfono e inténtalo de nuevo.",
+};
 
 async function aplicarProgramaDeUrl(form) {
   const params = new URLSearchParams(location.search);
@@ -157,20 +173,26 @@ export function initLeadForm() {
     try {
       const res = await fetch(FORM_CONFIG.endpoint, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(datos),
       });
       if (!res.ok) throw new Error(String(res.status));
-      form.reset();
-      form.elements.mensaje.dataset.autollenado = "false";
-      mostrarEstado(form, "ok", "¡Gracias! Recibimos tu mensaje y te contactaremos pronto.");
+      const r = await res.json();
+      if (r.ok) {
+        form.reset();
+        form.elements.mensaje.dataset.autollenado = "false";
+        mostrarEstado(form, "ok", "¡Gracias! Recibimos tu mensaje y te contactaremos pronto.");
+      } else if (r.error === "limite") {
+        mostrarEstado(form, "error", MENSAJES_ERROR.limite, true);
+      } else if (MENSAJES_ERROR[r.error]) {
+        mostrarEstado(form, "error", MENSAJES_ERROR[r.error]);
+      } else {
+        throw new Error(r.error || "desconocido");
+      }
     } catch {
-      mostrarEstado(
-        form,
-        "error",
-        `No pudimos enviar tu mensaje. Abrimos tu app de correo para que lo mandes a ${FORM_CONFIG.destinatario}.`
-      );
-      abrirCorreo(datos);
+      // No se reenvía por correo automáticamente: si el servidor sí guardó la
+      // solicitud, se duplicaría. Se ofrece el correo como alternativa.
+      mostrarEstado(form, "error", "No pudimos enviar tu mensaje. Inténtalo de nuevo en un momento o escríbenos a", true);
     } finally {
       boton.disabled = false;
     }
