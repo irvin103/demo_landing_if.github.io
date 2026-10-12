@@ -26,7 +26,17 @@
       <div class="flex gap-4">
         <a
           class="w-10 h-10 rounded-full bg-white/10 hover:bg-white hover:text-brand-dark flex items-center justify-center transition-colors duration-300"
+          href="https://www.facebook.com/flemingmexico/"
+          aria-label="Facebook (se abre en otra pestaña)"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <i class="fab fa-facebook-f text-lg"></i>
+        </a>
+        <a
+          class="w-10 h-10 rounded-full bg-white/10 hover:bg-white hover:text-brand-dark flex items-center justify-center transition-colors duration-300"
           href="https://www.tiktok.com/@institutofleming.cdmx"
+          aria-label="TikTok (se abre en otra pestaña)"
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -35,6 +45,7 @@
         <a
           class="w-10 h-10 rounded-full bg-white/10 hover:bg-white hover:text-brand-dark flex items-center justify-center transition-colors duration-300"
           href="https://www.youtube.com/@INSTITUTOFLEMINGOFICIALCDMX"
+          aria-label="YouTube (se abre en otra pestaña)"
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -43,6 +54,7 @@
         <a
           class="w-10 h-10 rounded-full bg-white/10 hover:bg-white hover:text-brand-dark flex items-center justify-center transition-colors duration-300"
           href="https://www.instagram.com/institutofleming_oficial/"
+          aria-label="Instagram (se abre en otra pestaña)"
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -51,6 +63,7 @@
         <a
           class="w-10 h-10 rounded-full bg-white/10 hover:bg-white hover:text-brand-dark flex items-center justify-center transition-colors duration-300"
           href="https://api.whatsapp.com/send/?phone=5215523078269&amp;text&amp;type=phone_number&amp;app_absent=0"
+          aria-label="WhatsApp (se abre en otra pestaña)"
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -59,8 +72,13 @@
       </div>
     </div>
 
-    <div class="border-t border-white/20 pt-8 text-center text-xs text-gray-400">
-      <p>© 2026 Instituto Fleming. Todos los derechos reservados. | Aviso de Privacidad</p>
+    <div class="border-t border-white/20 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-white/60">
+      <p>© 2026 Instituto Fleming. Todos los derechos reservados.</p>
+      <nav aria-label="Documentos legales" class="flex flex-wrap justify-center gap-x-6 gap-y-2">
+        <a href="aviso-privacidad.html" class="hover:text-white transition-colors">Aviso de privacidad</a>
+        <a href="assets/docs/reglamento-universitario.pdf" target="_blank" rel="noopener" class="hover:text-white transition-colors">Reglamento universitario (PDF)</a>
+        <a href="assets/docs/reglamento-escolar.pdf" target="_blank" rel="noopener" class="hover:text-white transition-colors">Reglamento escolar (PDF)</a>
+      </nav>
     </div>
   </div>
 </footer>

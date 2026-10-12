@@ -5,7 +5,8 @@ Sitio web multi-página para el **Instituto Fleming**, construido como sitio est
 ## Páginas del sitio
 
 - **`index.html`** — Home: hero, promociones, oferta educativa (con detalle por nivel en un modal), planteles, estadísticas y el formulario de contacto ("Resuelve tus dudas").
-- **`nosotros.html`** — Historia del instituto, misión/visión/valores y el equipo directivo.
+- **`nosotros.html`** — Historia del instituto y misión/visión/valores.
+- **`aviso-privacidad.html`** — Aviso de privacidad completo (transcrito del PDF oficial, sin cambios de redacción), con resumen, índice navegable y descarga del PDF. Enlazado desde el footer.
 - **19 páginas de programa** (`bachillerato-gastronomia.html`, `licenciatura-derecho.html`, `ingenieria-industrial.html`, etc.) — una página dedicada por programa académico, con imagen principal, tabs verticales de detalle y botón de contacto. Ver la sección "Páginas de programa" más abajo.
 
 ## ¿Cómo funciona?
@@ -23,6 +24,7 @@ Al depender de `fetch` para partials y datos, el sitio necesita servirse por HTT
 demo_landing_if.github.io/
 ├── index.html                       # Home
 ├── nosotros.html                    # Página "Nosotros"
+├── aviso-privacidad.html            # Aviso de privacidad (contenido estático)
 ├── <programa>.html × 19             # Una página por programa académico (ver más abajo)
 │
 ├── partials/
@@ -41,17 +43,17 @@ demo_landing_if.github.io/
 │       ├── hero.html                # Historia (1981, 45 años, +3,000 alumnos) + CTA
 │       ├── quienes-somos.html       # "¿Por qué estudiar en Instituto Fleming?" (4 tarjetas)
 │       ├── mision-vision.html       # Misión / Visión / Objetivos (cultura organizacional)
-│       ├── valores.html             # Los 7 valores institucionales (icon-grid)
-│       └── directivos.html          # Contenedor de directivos (#directivos-grid) + modal de semblanza
+│       └── valores.html             # Los 7 valores institucionales (icon-grid)
 │
 ├── assets/
 │   ├── css/styles.css               # Overlay del hero, fondo de mapa, animaciones [data-reveal], franja de certificación, colores del chat
 │   ├── js/
-│   │   ├── tailwind-config.js       # Tema de Tailwind (colores, tipografía) compartido por las 21 páginas
-│   │   ├── main.js                  # Orquestador: inyecta partials, nav activo, animaciones al hacer scroll, scroll a #ancla
+│   │   ├── tailwind-config.js       # Tema de Tailwind (colores, tipografía) compartido por todas las páginas
+│   │   ├── main.js                  # Orquestador: inyecta partials, nav activo, menú móvil, animaciones al hacer scroll, scroll a #ancla
 │   │   ├── render-sections.js       # Toda la lógica de renderizado dinámico (ver detalle abajo)
 │   │   └── n8n-chat.js              # Widget de chat (@n8n/chat) — webhook temporal de ngrok
-│   └── img/                         # Imágenes locales (logos, oferta, directivos, hero, planteles)
+│   ├── img/                         # Imágenes locales (logos, oferta, hero, planteles)
+│   └── docs/                        # PDFs oficiales: aviso de privacidad, reglamento universitario y escolar
 │
 └── data/
     ├── promos.json                  # Tarjetas promocionales del home
@@ -62,7 +64,6 @@ demo_landing_if.github.io/
     │   ├── maestrias.json           # 2 programas
     │   └── tecnicas.json            # 3 programas
     ├── planteles.json               # Planteles (nombre, tag, descripción, dirección, teléfono, imagen)
-    ├── directivos.json              # Equipo directivo (nombre, cargo, foto, semblanza)
     └── form-options.json            # (sin usar; árbol Plantel→Nivel→Modalidad→Programa, ver nota abajo)
 ```
 
@@ -94,7 +95,6 @@ Luego abre `http://localhost:8080`.
 
 - **`assets/js/n8n-chat.js`** apunta a un webhook de **ngrok temporal**; se ha tenido que actualizar varias veces (ver historial de commits). Debe reemplazarse por un endpoint estable antes de depender de él en producción.
 - El botón "Enviar" de `partials/lead-form.html` **no tiene backend conectado todavía** — no envía datos a ningún lado.
-- **`data/directivos.json`**: solo Miguel Ángel Reyes Casillas tiene fotografía real; el resto muestra iniciales. El director del Plantel Zaragoza sigue como `"Nombre pendiente"`. Todas las semblanzas (`bio`) están vacías (se muestra "Semblanza próximamente").
 - Algunas fotos de programas (`turismo.jpg`, `puericultura.jpg`, `psicopedagogia.jfif`) tienen resolución nativa baja y pueden verse un poco suaves incluso en el tamaño más chico — requeriría fotografía de mayor resolución para corregirse del todo.
 - **`assets/img/turismo_2.webp`** no está enlazado desde ningún programa (solo se usa `turismo.jpg`).
 - **`data/form-options.json`** ya no se usa en ningún lado (quedó de una versión anterior del formulario). Se dejó en el repo por si se retoma, pero no forma parte del flujo activo.

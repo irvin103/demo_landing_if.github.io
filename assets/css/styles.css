@@ -107,6 +107,17 @@ html {
     rgba(255, 255, 255, 0) 100%
   );
 }
+/* En móvil el texto ocupa todo el ancho y queda sobre la foto: velo parejo. */
+@media (max-width: 767px) {
+  .hero-overlay {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.92) 0%,
+      rgba(255, 255, 255, 0.82) 70%,
+      rgba(255, 255, 255, 0.55) 100%
+    );
+  }
+}
 .dark .hero-overlay {
   background: linear-gradient(
     90deg,

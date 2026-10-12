@@ -50,6 +50,14 @@
           <div data-dropdown-panel class="hidden absolute left-0 top-full z-50 pt-3">
             <div class="w-56 bg-white dark:bg-surface-dark rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 py-2">
               <a
+                href="https://www.facebook.com/flemingmexico/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/60 hover:text-primary dark:hover:text-primary transition-colors"
+              >
+                <i class="fab fa-facebook-f text-lg w-5 text-center flex-shrink-0"></i> Facebook
+              </a>
+              <a
                 href="https://www.tiktok.com/@institutofleming.cdmx"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -96,9 +104,48 @@
         </div>
       </div>
 
-      <button class="md:hidden p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700" aria-label="Abrir menú">
-        <span class="material-icons">menu</span>
+      <button
+        id="mobile-menu-toggle"
+        type="button"
+        class="md:hidden p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+        aria-label="Abrir menú"
+        aria-controls="mobile-menu"
+        aria-expanded="false"
+      >
+        <span class="material-icons" aria-hidden="true">menu</span>
       </button>
+    </div>
+
+    <div id="mobile-menu" class="md:hidden hidden border-t border-gray-200 dark:border-gray-700 py-4">
+      <nav aria-label="Menú principal" class="flex flex-col">
+        <a href="index.html" class="block rounded-lg px-3 py-3 font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/60 hover:text-primary transition-colors">Inicio</a>
+        <a href="index.html#oferta-educativa" class="block rounded-lg px-3 py-3 font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/60 hover:text-primary transition-colors">Oferta Educativa</a>
+        <a href="nosotros.html" class="block rounded-lg px-3 py-3 font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/60 hover:text-primary transition-colors">Nosotros</a>
+        <a href="index.html#lead-form" class="block rounded-lg px-3 py-3 font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/60 hover:text-primary transition-colors">Contacto</a>
+      </nav>
+      <div class="mt-4 px-3 flex flex-col gap-4">
+        <div class="flex flex-wrap gap-3">
+          <a href="https://www.facebook.com/flemingmexico/" target="_blank" rel="noopener noreferrer" aria-label="Facebook (se abre en otra pestaña)" class="w-10 h-10 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white flex items-center justify-center transition-colors">
+            <i class="fab fa-facebook-f"></i>
+          </a>
+          <a href="https://www.tiktok.com/@institutofleming.cdmx" target="_blank" rel="noopener noreferrer" aria-label="TikTok (se abre en otra pestaña)" class="w-10 h-10 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white flex items-center justify-center transition-colors">
+            <i class="fab fa-tiktok"></i>
+          </a>
+          <a href="https://www.youtube.com/@INSTITUTOFLEMINGOFICIALCDMX" target="_blank" rel="noopener noreferrer" aria-label="YouTube (se abre en otra pestaña)" class="w-10 h-10 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white flex items-center justify-center transition-colors">
+            <i class="fab fa-youtube"></i>
+          </a>
+          <a href="https://www.instagram.com/institutofleming_oficial/" target="_blank" rel="noopener noreferrer" aria-label="Instagram (se abre en otra pestaña)" class="w-10 h-10 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white flex items-center justify-center transition-colors">
+            <i class="fab fa-instagram"></i>
+          </a>
+          <a href="https://api.whatsapp.com/send/?phone=5215523078269&amp;text&amp;type=phone_number&amp;app_absent=0" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp (se abre en otra pestaña)" class="w-10 h-10 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white flex items-center justify-center transition-colors">
+            <i class="fab fa-whatsapp"></i>
+          </a>
+        </div>
+        <div class="text-sm text-secondary-text-light dark:text-secondary-text-dark flex flex-col gap-1">
+          <span><a href="tel:5556862752" class="hover:text-primary">5556862752</a> / <a href="tel:5556858511" class="hover:text-primary">5556858511</a></span>
+          <a href="mailto:info@institutofleming.edu.mx" class="hover:text-primary">info@institutofleming.edu.mx</a>
+        </div>
+      </div>
     </div>
   </div>
 </nav>
