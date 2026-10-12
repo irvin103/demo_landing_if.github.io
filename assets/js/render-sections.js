@@ -893,8 +893,8 @@ export async function renderPromos() {
     const title = safeTitleWithBr(p.title || "");
     const href = escapeHTML(p.href || "#");
     const icon = escapeHTML(p.icon || "star");
-    const bg = escapeHTML(p.bg || "#002147");
-    const hoverBg = escapeHTML(p.hoverBg || "#003366");
+    const bg = escapeHTML(p.bg || "#000B4D");
+    const hoverBg = escapeHTML(p.hoverBg || "#001590");
 
     return `
       <a class="promo-card group relative overflow-hidden rounded-md shadow-sm transition-all duration-300 hover:shadow-md h-16 flex items-center justify-start px-4"

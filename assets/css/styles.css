@@ -2,6 +2,103 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Widget de chat (@n8n/chat): mismos colores que el tema de Tailwind.
+   Los nombres de variables son los de @n8n/chat 1.x (ojo: "--color--primary"
+   lleva doble guion). */
+:root {
+  --chat--color--primary: #001590;
+  --chat--color--primary-shade-50: #000f6b;
+  --chat--color--primary--shade-100: #000b4d;
+  --chat--color--secondary: #2c4fc7;
+  --chat--color-secondary-shade-50: #2440a8;
+  --chat--color-dark: #000b4d;
+}
+
+/* --- Aparición al hacer scroll (ver initReveal en main.js) --------------- */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+[data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* --- Franja de certificación (red CONOCER + IMIFLE) --------------------- */
+.cert-glow {
+  background:
+    radial-gradient(40rem 18rem at 20% 60%, rgba(224, 28, 38, 0.06), transparent 70%),
+    radial-gradient(40rem 18rem at 80% 60%, rgba(0, 21, 144, 0.08), transparent 70%);
+}
+
+.cert-card {
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  padding: 2rem;
+  border-radius: 1.5rem;
+  background: #fff;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.08);
+  outline: 1px solid rgba(0, 21, 144, 0.06);
+}
+/* Destello diagonal que recorre la tarjeta al aparecer y al pasar el cursor. */
+.cert-card::after {
+  content: "";
+  position: absolute;
+  inset: -50% auto -50% -60%;
+  width: 40%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.85), transparent);
+  transform: translateX(0) rotate(12deg);
+  pointer-events: none;
+}
+.cert-card.is-visible::after {
+  animation: cert-shine 1.4s ease-out calc(var(--reveal-delay, 0ms) + 500ms) 1 both;
+}
+.cert-card:hover::after {
+  animation: cert-shine 1s ease-out 1 both;
+}
+
+.cert-card.is-visible .cert-logo {
+  animation: cert-float 6s ease-in-out calc(var(--reveal-delay, 0ms) + 900ms) infinite;
+}
+
+.cert-divider {
+  width: 2px;
+  height: 9rem;
+  border-radius: 9999px;
+  background: linear-gradient(to bottom, transparent, #e01c26, #001590, transparent);
+  transform: scaleY(0);
+  opacity: 1;
+  transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms);
+}
+.cert-divider.is-visible {
+  transform: scaleY(1);
+}
+
+@keyframes cert-shine {
+  from { transform: translateX(0) rotate(12deg); }
+  to   { transform: translateX(450%) rotate(12deg); }
+}
+@keyframes cert-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal],
+  .cert-divider {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .cert-card::after,
+  .cert-card .cert-logo {
+    animation: none !important;
+  }
+}
+
 .hero-overlay {
   background: linear-gradient(
     90deg,

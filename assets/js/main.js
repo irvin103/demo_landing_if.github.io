@@ -40,6 +40,28 @@ function setActiveNavLink() {
 // salto nativo del navegador a un #ancla en la URL suele dispararse ANTES
 // de que ese contenido exista en el DOM, así que no llega a ningún lado.
 // Se reintenta el scroll a mano una vez que los partials ya están listos.
+// Activa la animación de entrada (.is-visible) de los elementos [data-reveal]
+// cuando llegan al viewport. Sin IntersectionObserver se muestran de inmediato.
+function initReveal() {
+  const nodes = document.querySelectorAll("[data-reveal]");
+  if (!("IntersectionObserver" in window)) {
+    nodes.forEach((el) => el.classList.add("is-visible"));
+    return;
+  }
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-visible");
+        observer.unobserve(entry.target);
+      });
+    },
+    { threshold: 0.2 }
+  );
+  nodes.forEach((el) => observer.observe(el));
+}
+
 function scrollToHashTarget() {
   if (!location.hash) return;
   document.querySelector(location.hash)?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -49,6 +71,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await includePartials();
   setActiveNavLink();
   initComunidadDropdown();
+  initReveal();
 
   await Promise.allSettled([
     renderPromos(),

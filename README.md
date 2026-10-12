@@ -10,7 +10,7 @@ Sitio web multi-página para el **Instituto Fleming**, construido como sitio est
 
 ## ¿Cómo funciona?
 
-1. Cada página define su `<head>` (Tailwind CDN + configuración de tema, fuentes, `assets/css/styles.css`) y marca los puntos de inserción de cada sección con `data-include="partials/archivo.html"`.
+1. Cada página define su `<head>` (Tailwind CDN + `assets/js/tailwind-config.js` con el tema compartido, fuentes, `assets/css/styles.css`) y marca los puntos de inserción de cada sección con `data-include="partials/archivo.html"`.
 2. `assets/js/main.js` recorre esos elementos, hace `fetch` de cada partial (con `cache: "no-cache"` para evitar servir versiones desactualizadas mientras se itera) y lo inyecta como `innerHTML`. Luego resuelve, en este orden: qué link del nav debe verse "activo" según la página actual, el menú desplegable de redes sociales, el resto de secciones dependientes de datos (en paralelo), y por último el scroll a un `#ancla` si la URL trae una (debe ir al final para que la página ya tenga su alto real).
 3. `assets/js/render-sections.js` concentra toda la lógica de renderizado dinámico: lee los JSON de `data/` y llena las secciones, arma los menús desplegables del nav, los modales, los acordeones y las páginas de programa.
 4. `assets/js/n8n-chat.js` inicializa el widget de chat de `@n8n/chat` contra un webhook de n8n.
@@ -30,13 +30,13 @@ demo_landing_if.github.io/
 │   │                                 #   Nosotros, dropdown "Comunidad" (redes sociales), teléfono/email
 │   ├── hero.html                    # Hero del home
 │   ├── promo-cards.html             # Contenedor de tarjetas promocionales (#promo-grid)
+│   ├── certificacion.html           # Franja animada red CONOCER + Universidad Fleming IMIFLE
 │   ├── oferta-educativa.html        # Contenedor de tarjetas por nivel (#oferta-grid) + modal de detalle
 │   ├── planteles.html               # Contenedor de tarjetas de planteles (#planteles-grid)
 │   ├── stats.html                   # Cita institucional + 3 estadísticas (contenido estático)
 │   ├── lead-form.html               # Formulario "Resuelve tus dudas" (id="lead-form") + video de YouTube Shorts
 │   ├── footer.html                  # Logo, contacto, redes sociales (layout de 3 columnas)
 │   ├── programa-detalle.html        # Skeleton compartido por las 19 páginas de programa
-│   ├── head.html                    # (sin usar; copia de referencia del <head>)
 │   └── nosotros/
 │       ├── hero.html                # Historia (1981, 45 años, +3,000 alumnos) + CTA
 │       ├── quienes-somos.html       # "¿Por qué estudiar en Instituto Fleming?" (4 tarjetas)
@@ -45,12 +45,13 @@ demo_landing_if.github.io/
 │       └── directivos.html          # Contenedor de directivos (#directivos-grid) + modal de semblanza
 │
 ├── assets/
-│   ├── css/styles.css               # Overlay del hero, fondo de mapa, scroll suave
+│   ├── css/styles.css               # Overlay del hero, fondo de mapa, animaciones [data-reveal], franja de certificación, colores del chat
 │   ├── js/
-│   │   ├── main.js                  # Orquestador: inyecta partials, nav activo, scroll a #ancla
+│   │   ├── tailwind-config.js       # Tema de Tailwind (colores, tipografía) compartido por las 21 páginas
+│   │   ├── main.js                  # Orquestador: inyecta partials, nav activo, animaciones al hacer scroll, scroll a #ancla
 │   │   ├── render-sections.js       # Toda la lógica de renderizado dinámico (ver detalle abajo)
 │   │   └── n8n-chat.js              # Widget de chat (@n8n/chat) — webhook temporal de ngrok
-│   └── img/                         # Imágenes locales (oferta, directivos, hero, planteles)
+│   └── img/                         # Imágenes locales (logos, oferta, directivos, hero, planteles)
 │
 └── data/
     ├── promos.json                  # Tarjetas promocionales del home
@@ -96,12 +97,13 @@ Luego abre `http://localhost:8080`.
 - **`data/directivos.json`**: solo Miguel Ángel Reyes Casillas tiene fotografía real; el resto muestra iniciales. El director del Plantel Zaragoza sigue como `"Nombre pendiente"`. Todas las semblanzas (`bio`) están vacías (se muestra "Semblanza próximamente").
 - Algunas fotos de programas (`turismo.jpg`, `puericultura.jpg`, `psicopedagogia.jfif`) tienen resolución nativa baja y pueden verse un poco suaves incluso en el tamaño más chico — requeriría fotografía de mayor resolución para corregirse del todo.
 - **`assets/img/turismo_2.webp`** no está enlazado desde ningún programa (solo se usa `turismo.jpg`).
-- **`data/form-options.json`** y **`partials/head.html`** ya no se usan en ningún lado (quedaron de una versión anterior del formulario / del `<head>`). Se dejaron en el repo por si se retoman, pero no forman parte del flujo activo.
+- **`data/form-options.json`** ya no se usa en ningún lado (quedó de una versión anterior del formulario). Se dejó en el repo por si se retoma, pero no forma parte del flujo activo.
+- **`assets/img/logo-red-conocer.webp`** es provisional: se recortó de la imagen del sitio actual y usa la identidad anterior de CONOCER. Reemplazarlo por el archivo oficial cuando el cliente lo entregue (misma ruta, sin tocar código).
 
 ## Tecnologías utilizadas
 
 - **HTML5** + **JavaScript vanilla (ES Modules)** — sin build step ni framework.
-- **Tailwind CSS** (vía CDN, con `tailwind.config` inline para colores/tipografía de marca).
+- **Tailwind CSS** (vía CDN; el tema de marca vive en `assets/js/tailwind-config.js`: azul `#001590` del logo IMIFLE y rojo `#E01C26` de CONOCER como acento).
 - **Material Icons / Material Symbols** y **Font Awesome** (incluye íconos de marca: TikTok, YouTube, Instagram, WhatsApp) para iconografía.
 - **Google Fonts (Montserrat)**.
 - **[@n8n/chat](https://www.npmjs.com/package/@n8n/chat)** para el widget de chat conectado a un flujo de automatización en n8n.
