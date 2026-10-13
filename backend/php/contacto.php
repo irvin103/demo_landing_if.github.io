@@ -16,6 +16,32 @@ declare(strict_types=1);
 
 date_default_timezone_set('America/Mexico_City');
 
+// --- Errores ----------------------------------------------------------------
+// Nunca se muestran al visitante: romperían el JSON y revelarían rutas del
+// servidor. Van a errores.log junto a config.php (fuera de public_html); si
+// no, cPanel crearía un "error_log" público junto a este archivo.
+
+function ruta_config(): string
+{
+    return getenv('FLEMING_FORM_CONFIG') ?: dirname(__DIR__, 2) . '/fleming-formulario/config.php';
+}
+
+ini_set('display_errors', '0');
+ini_set('log_errors', '1');
+if (is_dir(dirname(ruta_config())) && is_writable(dirname(ruta_config()))) {
+    ini_set('error_log', dirname(ruta_config()) . '/errores.log');
+}
+// Cualquier excepción o error fatal (incluido un error de sintaxis en
+// config.php) responde JSON en lugar de una página de error.
+set_exception_handler(function (Throwable $e): void {
+    error_log('[formulario-fleming] ' . get_class($e) . ': ' . $e->getMessage() . ' (' . basename($e->getFile()) . ':' . $e->getLine() . ')');
+    if (!headers_sent()) {
+        http_response_code(500);
+        header('Content-Type: application/json; charset=utf-8');
+    }
+    echo json_encode(['ok' => false, 'error' => 'servidor']);
+});
+
 // --- Configuración --------------------------------------------------------
 
 function cargar_config(): array
@@ -30,16 +56,31 @@ function cargar_config(): array
         'SEND_CONFIRMATION'       => false,
         'LEADS_CSV'               => '',
         'RATE_DIR'                => sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'fleming-formulario',
+        'ERROR_LOG'               => '',
+        'IP_HEADER'               => '',
         'SEGUNDOS_ENTRE_MENSAJES' => 60,  // por correo
-        'LIMITE_POR_IP'           => 5,   // envíos por IP...
+        'LIMITE_POR_IP'           => 5,   // intentos por IP...
         'VENTANA_IP_SEGUNDOS'     => 600, // ...en esta ventana
-        'LIMITE_DIARIO'           => 200,
+        'LIMITE_DIARIO'           => 100, // el plan gratis de Resend permite 100 al día
     ];
-    // Ruta del archivo de configuración: variable de entorno o, por defecto,
-    // /home/<usuario>/fleming-formulario/config.php (fuera de public_html).
-    $ruta = getenv('FLEMING_FORM_CONFIG') ?: dirname(__DIR__, 2) . '/fleming-formulario/config.php';
+    $ruta = ruta_config();
     $propia = is_file($ruta) ? require $ruta : [];
-    return array_merge($defaults, is_array($propia) ? $propia : []);
+    $c = array_merge($defaults, is_array($propia) ? $propia : []);
+
+    // Tipos esperados: un valor mal escrito en config.php no debe tumbar el script.
+    foreach (['RESEND_API_KEY', 'RESEND_API_URL', 'FROM_EMAIL', 'TO_EMAIL', 'ASUNTO', 'LEADS_CSV', 'RATE_DIR', 'ERROR_LOG', 'IP_HEADER'] as $k) {
+        $c[$k] = is_string($c[$k]) ? $c[$k] : '';
+    }
+    foreach (['SEGUNDOS_ENTRE_MENSAJES', 'LIMITE_POR_IP', 'VENTANA_IP_SEGUNDOS', 'LIMITE_DIARIO'] as $k) {
+        $c[$k] = (int) $c[$k];
+    }
+    $c['ALLOWED_ORIGINS'] = is_array($c['ALLOWED_ORIGINS']) ? array_values(array_filter($c['ALLOWED_ORIGINS'], 'is_string')) : [];
+    $c['SEND_CONFIRMATION'] = (bool) $c['SEND_CONFIRMATION'];
+
+    if ($c['ERROR_LOG'] !== '') {
+        ini_set('error_log', $c['ERROR_LOG']);
+    }
+    return $c;
 }
 
 const CAMPOS = [
@@ -51,7 +92,7 @@ const CAMPOS = [
     'programaNombre' => 200,
     'nivel'          => 60,
     'pagina'         => 500,
-    'empresa'        => 200, // campo trampa para bots
+    'campo_extra'    => 200, // campo trampa para bots (nombre sin significado para el autollenado)
 ];
 
 // --- Utilidades -----------------------------------------------------------
@@ -73,6 +114,8 @@ function aplicar_cors(array $config): bool
         return true; // petición sin Origin (p. ej. curl): no aplica CORS
     }
     if (!in_array($origen, $config['ALLOWED_ORIGINS'], true)) {
+        // Si el sitio real cae aquí, falta su dominio en ALLOWED_ORIGINS.
+        error_log('[formulario-fleming] Origen no permitido: ' . mb_substr($origen, 0, 200));
         return false;
     }
     header('Access-Control-Allow-Origin: ' . $origen);
@@ -87,6 +130,10 @@ function limpiar(array $entrada): array
     $datos = [];
     foreach (CAMPOS as $campo => $max) {
         $valor = isset($entrada[$campo]) && is_scalar($entrada[$campo]) ? (string) $entrada[$campo] : '';
+        if ($campo !== 'mensaje') {
+            // Campos de una línea: sin saltos (llegan al asunto del correo y al CSV).
+            $valor = preg_replace('/\s+/u', ' ', $valor) ?? '';
+        }
         // Quita caracteres de control, salvo saltos de línea.
         $valor = preg_replace('/[^\P{C}\n]+/u', '', $valor) ?? '';
         $datos[$campo] = mb_substr(trim($valor), 0, $max);
@@ -94,6 +141,18 @@ function limpiar(array $entrada): array
     return $datos;
 }
 
+/** La página de origen solo se acepta si es del propio sitio (se lee en el correo). */
+function pagina_del_sitio(array $config, string $url): string
+{
+    foreach ($config['ALLOWED_ORIGINS'] as $origen) {
+        if ($url === $origen || strpos($url, $origen . '/') === 0) {
+            return $url;
+        }
+    }
+    return '';
+}
+
+/** Devuelve el campo inválido, o '' si todo está bien. */
 function validar(array $d): string
 {
     if (mb_strlen($d['nombre']) < 2) {
@@ -102,19 +161,44 @@ function validar(array $d): string
     if (!filter_var($d['email'], FILTER_VALIDATE_EMAIL)) {
         return 'email';
     }
-    $digitos = preg_replace('/\D/', '', $d['telefono']) ?? '';
-    if ($digitos !== '' && strlen($digitos) < 10) {
-        return 'telefono';
+    if ($d['telefono'] !== '') {
+        // Solo dígitos y separadores comunes; así tampoco puede ser una fórmula en el CSV.
+        $digitos = preg_replace('/\D/', '', $d['telefono']) ?? '';
+        if (!preg_match('/^[0-9 +().\-]+$/', $d['telefono']) || strlen($digitos) < 10) {
+            return 'telefono';
+        }
     }
     return '';
 }
 
+function programa_de(array $d): string
+{
+    return $d['programaNombre'] !== '' ? $d['programaNombre'] : $d['programa'];
+}
+
+/** IP del visitante. IP_HEADER solo se usa si el sitio está detrás de ese proxy (p. ej. Cloudflare). */
+function ip_cliente(array $config): string
+{
+    if ($config['IP_HEADER'] !== '') {
+        $ip = trim(explode(',', (string) ($_SERVER[$config['IP_HEADER']] ?? ''))[0]);
+        if (filter_var($ip, FILTER_VALIDATE_IP)) {
+            return $ip;
+        }
+    }
+    return (string) ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
+}
+
 /*
  * Límites anti-abuso con archivos en RATE_DIR (funciona en hosting
- * compartido): un envío por correo cada N segundos, unos cuantos por IP en
- * una ventana (una IP puede ser la red de una escuela o de datos móviles,
- * compartida por muchas personas) y un tope diario. Solo cuentan los envíos
- * que sí salieron (registrar_envio).
+ * compartido): un envío por correo cada N segundos, unos cuantos intentos por
+ * IP en una ventana (una IP puede ser la red de una escuela o de datos
+ * móviles, compartida por muchas personas) y un tope diario.
+ *
+ * Se revisa y se aparta el lugar ANTES de enviar, bajo un mismo candado, para
+ * que peticiones simultáneas no se cuelen. Por IP y por día cuentan los
+ * intentos (también los que Resend rechaza: si Resend falla, nadie puede
+ * llenar el CSV sin límite). El apartado por correo se libera si el envío
+ * falla, para que la persona pueda reintentar enseguida.
  */
 function archivo_correo(string $dir, string $email): string
 {
@@ -126,65 +210,85 @@ function archivo_ip(string $dir, string $ip): string
     return $dir . '/ip_' . sha1('ip:' . $ip);
 }
 
+function preparar_rate_dir(array $config): ?string
+{
+    $dir = $config['RATE_DIR'];
+    if ($dir === '' || (!is_dir($dir) && !@mkdir($dir, 0700, true) && !is_dir($dir)) || !is_writable($dir)) {
+        return null;
+    }
+    return $dir;
+}
+
+function escribir(string $ruta, string $contenido): void
+{
+    if (@file_put_contents($ruta, $contenido) === false) {
+        throw new RuntimeException('No se pudo escribir ' . basename($ruta) . ' en RATE_DIR');
+    }
+}
+
 /** Lee {inicio, n} de la ventana de una IP; vacía si ya expiró. */
 function ventana_ip(array $config, string $archivo): array
 {
-    $v = is_file($archivo) ? json_decode((string) file_get_contents($archivo), true) : null;
-    if (!is_array($v) || time() - (int) ($v['inicio'] ?? 0) >= (int) $config['VENTANA_IP_SEGUNDOS']) {
+    $v = is_file($archivo) ? json_decode((string) @file_get_contents($archivo), true) : null;
+    if (!is_array($v) || time() - (int) ($v['inicio'] ?? 0) >= $config['VENTANA_IP_SEGUNDOS']) {
         return ['inicio' => time(), 'n' => 0];
     }
     return ['inicio' => (int) $v['inicio'], 'n' => (int) ($v['n'] ?? 0)];
 }
 
-function preparar_rate_dir(array $config): ?string
+/** Borra de vez en cuando los archivos de límites de días anteriores. */
+function purgar_viejos(string $dir): void
 {
-    $dir = $config['RATE_DIR'];
-    if (!is_dir($dir) && !@mkdir($dir, 0700, true) && !is_dir($dir)) {
-        error_log('[formulario-fleming] No se pudo crear RATE_DIR: ' . $dir);
-        return null; // sin directorio no se limita, pero el formulario sigue funcionando
-    }
-    return $dir;
-}
-
-function limite_alcanzado(array $config, string $ip, string $email): bool
-{
-    $dir = preparar_rate_dir($config);
-    if ($dir === null) {
-        return false;
-    }
-    $correo = archivo_correo($dir, $email);
-    if (is_file($correo) && time() - (int) filemtime($correo) < (int) $config['SEGUNDOS_ENTRE_MENSAJES']) {
-        return true;
-    }
-    if (ventana_ip($config, archivo_ip($dir, $ip))['n'] >= (int) $config['LIMITE_POR_IP']) {
-        return true;
-    }
-    $contador = $dir . '/dia_' . date('Y-m-d');
-    return is_file($contador) && (int) file_get_contents($contador) >= (int) $config['LIMITE_DIARIO'];
-}
-
-function registrar_envio(array $config, string $ip, string $email): void
-{
-    $dir = preparar_rate_dir($config);
-    if ($dir === null) {
+    if (random_int(1, 50) !== 1) {
         return;
     }
-    touch(archivo_correo($dir, $email));
-    $archivo = archivo_ip($dir, $ip);
-    $v = ventana_ip($config, $archivo);
-    file_put_contents($archivo, json_encode(['inicio' => $v['inicio'], 'n' => $v['n'] + 1]), LOCK_EX);
-
-    $fp = fopen($dir . '/dia_' . date('Y-m-d'), 'c+');
-    if ($fp === false) {
-        return;
+    foreach (glob($dir . '/*') ?: [] as $archivo) {
+        if (preg_match('/^(rl|ip|dia)_/', basename($archivo)) && time() - (int) @filemtime($archivo) > 2 * 86400) {
+            @unlink($archivo);
+        }
     }
-    flock($fp, LOCK_EX);
-    $enviados = (int) stream_get_contents($fp);
-    ftruncate($fp, 0);
-    rewind($fp);
-    fwrite($fp, (string) ($enviados + 1));
-    flock($fp, LOCK_UN);
-    fclose($fp);
+}
+
+/** true si había lugar y quedó apartado; false si se alcanzó algún límite. */
+function apartar_envio(array $config, string $dir, string $ip, string $email): bool
+{
+    $candado = @fopen($dir . '/.candado', 'c');
+    if ($candado === false || !flock($candado, LOCK_EX)) {
+        throw new RuntimeException('No se pudo bloquear RATE_DIR');
+    }
+    try {
+        $correo = archivo_correo($dir, $email);
+        if (is_file($correo) && time() - (int) filemtime($correo) < $config['SEGUNDOS_ENTRE_MENSAJES']) {
+            return false;
+        }
+        $archivo_ip = archivo_ip($dir, $ip);
+        $v = ventana_ip($config, $archivo_ip);
+        if ($v['n'] >= $config['LIMITE_POR_IP']) {
+            return false;
+        }
+        $archivo_dia = $dir . '/dia_' . date('Y-m-d');
+        $hoy = is_file($archivo_dia) ? (int) @file_get_contents($archivo_dia) : 0;
+        if ($hoy >= $config['LIMITE_DIARIO']) {
+            return false;
+        }
+
+        escribir($correo, (string) time());
+        escribir($archivo_ip, (string) json_encode(['inicio' => $v['inicio'], 'n' => $v['n'] + 1]));
+        escribir($archivo_dia, (string) ($hoy + 1));
+        if ($hoy + 1 === $config['LIMITE_DIARIO'] || $hoy + 1 === intdiv($config['LIMITE_DIARIO'] * 4, 5)) {
+            error_log('[formulario-fleming] Aviso: van ' . ($hoy + 1) . ' de ' . $config['LIMITE_DIARIO'] . ' envíos permitidos hoy.');
+        }
+        purgar_viejos($dir);
+        return true;
+    } finally {
+        flock($candado, LOCK_UN);
+        fclose($candado);
+    }
+}
+
+function liberar_correo(string $dir, string $email): void
+{
+    @unlink(archivo_correo($dir, $email));
 }
 
 // Evita que Excel interprete como fórmula un texto que empieza con = + - @.
@@ -199,22 +303,29 @@ function guardar_csv(array $config, array $d): void
     if ($ruta === '') {
         return;
     }
-    $nuevo = !is_file($ruta);
+    // Tiene datos personales: solo el dueño de la cuenta puede leerlo (600).
+    $mascara = umask(0077);
     $fp = @fopen($ruta, 'a');
+    umask($mascara);
     if ($fp === false) {
-        error_log('[formulario-fleming] No se pudo abrir LEADS_CSV: ' . $ruta);
+        error_log('[formulario-fleming] No se pudo abrir LEADS_CSV.');
         return;
     }
     flock($fp, LOCK_EX);
-    if ($nuevo) {
-        fputcsv($fp, ['Fecha', 'Nombre', 'Teléfono', 'Correo', 'Programa', 'Nivel', 'Mensaje', 'Página']);
+    if (fstat($fp)['size'] === 0) {
+        fwrite($fp, "\xEF\xBB\xBF"); // BOM: Excel muestra bien los acentos
+        fputcsv($fp, ['Fecha', 'Nombre', 'Teléfono', 'Correo', 'Programa', 'Nivel', 'Mensaje', 'Página'], ',', '"', '');
     }
+    // El teléfono ya solo trae dígitos y separadores: se guarda tal cual (sin
+    // apóstrofo delante de un "+52").
     $fila = [
-        date('Y-m-d H:i:s'), $d['nombre'], $d['telefono'], $d['email'],
-        $d['programaNombre'] !== '' ? $d['programaNombre'] : $d['programa'],
-        $d['nivel'], $d['mensaje'], $d['pagina'],
+        date('Y-m-d H:i:s'), celda_segura($d['nombre']), $d['telefono'], celda_segura($d['email']),
+        celda_segura(programa_de($d)), celda_segura($d['nivel']), celda_segura($d['mensaje']), celda_segura($d['pagina']),
     ];
-    fputcsv($fp, array_map('celda_segura', $fila));
+    if (fputcsv($fp, $fila, ',', '"', '') === false) {
+        error_log('[formulario-fleming] No se pudo escribir en LEADS_CSV.');
+    }
+    fflush($fp);
     flock($fp, LOCK_UN);
     fclose($fp);
 }
@@ -226,13 +337,13 @@ function e(string $texto): string
 
 function cuerpo_correo(array $d): array
 {
-    $programa = $d['programaNombre'] !== '' ? $d['programaNombre'] : ($d['programa'] !== '' ? $d['programa'] : '(no indicó)');
+    $programa = programa_de($d) !== '' ? programa_de($d) : '(no indicó)';
     $filas = [
         'Nombre'              => $d['nombre'],
         'Correo'              => $d['email'],
         'Teléfono'            => $d['telefono'] !== '' ? $d['telefono'] : '(no lo dejó)',
         'Programa de interés' => $programa,
-        'Página'              => $d['pagina'],
+        'Página'              => $d['pagina'] !== '' ? $d['pagina'] : '(no indicada)',
     ];
     $mensaje = $d['mensaje'] !== '' ? $d['mensaje'] : 'Quiero más información, contáctenme.';
 
@@ -250,30 +361,36 @@ function cuerpo_correo(array $d): array
     return ['texto' => $texto, 'html' => $html];
 }
 
-/** Envía por la API de Resend. Devuelve true si Resend aceptó el correo. */
-function enviar_resend(array $config, array $payload, string $idempotencia): bool
+/** Envía por la API de Resend. true solo si Resend aceptó el correo y devolvió su id. */
+function enviar_resend(array $config, array $payload): bool
 {
+    $json = (string) json_encode($payload, JSON_UNESCAPED_UNICODE);
     $ch = curl_init($config['RESEND_API_URL']);
     curl_setopt_array($ch, [
         CURLOPT_POST           => true,
         CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CONNECTTIMEOUT => 5,
         CURLOPT_TIMEOUT        => 15,
         CURLOPT_HTTPHEADER     => [
             'Authorization: Bearer ' . $config['RESEND_API_KEY'],
             'Content-Type: application/json',
-            'Idempotency-Key: ' . $idempotencia,
+            // Un reintento idéntico en el mismo minuto no duplica el correo.
+            'Idempotency-Key: ' . hash('sha256', $json . '|' . date('Y-m-d H:i')),
         ],
-        CURLOPT_POSTFIELDS     => json_encode($payload, JSON_UNESCAPED_UNICODE),
+        CURLOPT_POSTFIELDS     => $json,
     ]);
     $respuesta = curl_exec($ch);
     $status = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
     $error = curl_error($ch);
     curl_close($ch);
 
-    if ($status >= 200 && $status < 300) {
+    $r = is_string($respuesta) ? json_decode($respuesta, true) : null;
+    if ($status >= 200 && $status < 300 && is_array($r) && is_string($r['id'] ?? null)) {
         return true;
     }
-    error_log('[formulario-fleming] Resend respondió ' . $status . ': ' . ($error !== '' ? $error : (string) $respuesta));
+    // Sin el cuerpo de la respuesta: puede traer correos (datos personales).
+    $tipo = $error !== '' ? $error : (is_array($r) && is_string($r['name'] ?? null) ? $r['name'] : 'respuesta inesperada');
+    error_log('[formulario-fleming] Resend respondió ' . $status . ': ' . $tipo);
     return false;
 }
 
@@ -290,15 +407,16 @@ if ($metodo === 'OPTIONS') {
     exit;
 }
 $configurado = $config['RESEND_API_KEY'] !== '' && $config['FROM_EMAIL'] !== '' && $config['TO_EMAIL'] !== '';
+$dir_limites = preparar_rate_dir($config);
 if ($metodo === 'GET') {
     // Comprobación rápida del despliegue (no revela la configuración).
-    responder(200, ['ok' => true, 'servicio' => 'formulario-fleming', 'configurado' => $configurado]);
+    responder(200, ['ok' => true, 'servicio' => 'formulario-fleming', 'configurado' => $configurado, 'limites' => $dir_limites !== null]);
 }
 if ($metodo !== 'POST') {
     responder(405, ['ok' => false, 'error' => 'metodo']);
 }
-if (!$configurado) {
-    error_log('[formulario-fleming] Falta configuración (RESEND_API_KEY, FROM_EMAIL o TO_EMAIL).');
+if (!$configurado || $dir_limites === null) {
+    error_log('[formulario-fleming] Falta configuración: ' . (!$configurado ? 'RESEND_API_KEY, FROM_EMAIL o TO_EMAIL.' : 'RATE_DIR no existe o no se puede escribir.'));
     responder(500, ['ok' => false, 'error' => 'configuracion']);
 }
 
@@ -309,15 +427,19 @@ if (!is_array($entrada)) {
 }
 
 $datos = limpiar($entrada);
-if ($datos['empresa'] !== '') {
-    responder(200, ['ok' => true]); // bot: se responde "ok" sin hacer nada
+if ($datos['campo_extra'] !== '') {
+    // Bot: se responde "ok" sin enviar. Se registra (sin datos personales)
+    // por si alguna vez lo activa una persona real.
+    error_log('[formulario-fleming] Campo trampa activado; solicitud descartada.');
+    responder(200, ['ok' => true]);
 }
-$error = validar($datos);
-if ($error !== '') {
-    responder(400, ['ok' => false, 'error' => $error]);
+$campo_invalido = validar($datos);
+if ($campo_invalido !== '') {
+    responder(400, ['ok' => false, 'error' => $campo_invalido]);
 }
-$ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-if (limite_alcanzado($config, $ip, $datos['email'])) {
+$datos['pagina'] = pagina_del_sitio($config, $datos['pagina']);
+
+if (!apartar_envio($config, $dir_limites, ip_cliente($config), $datos['email'])) {
     responder(429, ['ok' => false, 'error' => 'limite']);
 }
 
@@ -325,7 +447,7 @@ if (limite_alcanzado($config, $ip, $datos['email'])) {
 guardar_csv($config, $datos);
 
 $cuerpo = cuerpo_correo($datos);
-$programa = $datos['programaNombre'] !== '' ? $datos['programaNombre'] : $datos['programa'];
+$programa = programa_de($datos);
 $enviado = enviar_resend($config, [
     'from'     => $config['FROM_EMAIL'],
     'to'       => [$config['TO_EMAIL']],
@@ -333,21 +455,23 @@ $enviado = enviar_resend($config, [
     'subject'  => $config['ASUNTO'] . ($programa !== '' ? ' (' . $programa . ')' : ''),
     'html'     => $cuerpo['html'],
     'text'     => $cuerpo['texto'],
-], hash('sha256', $datos['email'] . '|' . $datos['mensaje'] . '|' . date('Y-m-d H:i')));
+]);
 
 if (!$enviado) {
+    liberar_correo($dir_limites, $datos['email']);
     responder(502, ['ok' => false, 'error' => 'envio']);
 }
-registrar_envio($config, $ip, $datos['email']);
 
 if ($config['SEND_CONFIRMATION']) {
+    // Texto fijo, sin nada de lo que escribió el visitante: así nadie puede
+    // usar el formulario para mandar su propio texto a otra persona.
     enviar_resend($config, [
         'from'     => $config['FROM_EMAIL'],
         'to'       => [$datos['email']],
         'reply_to' => $config['TO_EMAIL'],
         'subject'  => 'Recibimos tu mensaje, Instituto Fleming',
-        'text'     => 'Hola ' . $datos['nombre'] . ",\n\nGracias por escribirnos. Recibimos tu mensaje y te contactaremos pronto.\n\nInstituto Fleming",
-    ], hash('sha256', 'acuse|' . $datos['email'] . '|' . date('Y-m-d H:i')));
+        'text'     => "Hola:\n\nGracias por escribirnos. Recibimos tu mensaje y te contactaremos pronto.\n\nInstituto Fleming",
+    ]);
 }
 
 responder(200, ['ok' => true]);

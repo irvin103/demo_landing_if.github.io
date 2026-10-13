@@ -8,6 +8,9 @@ return [
     'SEND_CONFIRMATION' => false,
     'LEADS_CSV' => '/tmp/solicitudes.csv',
     'RATE_DIR' => '/tmp/limites',
+    'ERROR_LOG' => '/tmp/errores.log',
+    // Permite simular varias IP desde las pruebas.
+    'IP_HEADER' => 'HTTP_X_PRUEBA_IP',
     'SEGUNDOS_ENTRE_MENSAJES' => 60,
-    'LIMITE_DIARIO' => 200,
+    'LIMITE_DIARIO' => 100,
 ];

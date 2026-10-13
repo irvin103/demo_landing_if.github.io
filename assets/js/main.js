@@ -9,14 +9,17 @@ async function includePartials() {
       const file = el.getAttribute("data-include");
       if (!file) return;
 
-      const res = await fetch(file, { cache: "no-cache" });
-      if (!res.ok) {
-        el.innerHTML = `<!-- Error cargando ${file}: ${res.status} -->`;
-        return;
+      // Cada parcial falla por separado: uno que no cargue no debe impedir
+      // que el resto de la página (y sus scripts) arranque.
+      try {
+        const res = await fetch(file, { cache: "no-cache" });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        el.innerHTML = await res.text();
+        el.removeAttribute("data-include");
+      } catch (err) {
+        console.error(`No se pudo cargar ${file}:`, err);
+        el.innerHTML = `<!-- Error cargando ${file} -->`;
       }
-
-      el.innerHTML = await res.text();
-      el.removeAttribute("data-include");
     })
   );
 }
@@ -37,11 +40,8 @@ function setActiveNavLink() {
   });
 }
 
-// Como el contenido de la página se inyecta vía fetch (data-include), el
-// salto nativo del navegador a un #ancla en la URL suele dispararse ANTES
-// de que ese contenido exista en el DOM, así que no llega a ningún lado.
-// Se reintenta el scroll a mano una vez que los partials ya están listos.
 // Menú de navegación en móvil (el botón hamburguesa del nav, solo < md).
+// El estado lo anuncia aria-expanded; la etiqueta del botón no cambia.
 function initMobileMenu() {
   const toggle = document.getElementById("mobile-menu-toggle");
   const menu = document.getElementById("mobile-menu");
@@ -51,9 +51,13 @@ function initMobileMenu() {
   const setOpen = (open) => {
     menu.classList.toggle("hidden", !open);
     toggle.setAttribute("aria-expanded", String(open));
-    toggle.setAttribute("aria-label", open ? "Cerrar menú" : "Abrir menú");
     if (icon) icon.textContent = open ? "close" : "menu";
   };
+  // Al pasar a escritorio el menú móvil se oculta por CSS; se cierra también
+  // aquí para que aria-expanded no quede desactualizado.
+  window.matchMedia("(min-width: 768px)").addEventListener("change", (e) => {
+    if (e.matches) setOpen(false);
+  });
 
   toggle.addEventListener("click", () => setOpen(menu.classList.contains("hidden")));
   // Al elegir un enlace (incluidos los #ancla de la misma página) se cierra.
@@ -79,15 +83,35 @@ function indexStaggerChildren(container) {
 
 // Cuenta de 0 a la cifra final ("+3042", "+3,000", "14"), una sola vez. Si
 // el texto no es una cifra, o se prefiere menos movimiento, no hace nada.
-function countUp(el) {
-  const original = el.textContent.trim();
-  const match = original.match(/^(\D*)([\d,]+)(\D*)$/);
-  if (!match || prefersReducedMotion()) return;
-
+function parseCounter(text) {
+  const match = text.match(/^(\D*)([\d,]+)(\D*)$/);
+  if (!match) return null;
   const [, prefix, digits, suffix] = match;
-  const target = Number(digits.replace(/,/g, ""));
   const withCommas = digits.includes(",");
-  const format = (n) => prefix + (withCommas ? n.toLocaleString("en-US") : String(n)) + suffix;
+  return {
+    target: Number(digits.replace(/,/g, "")),
+    format: (n) => prefix + (withCommas ? n.toLocaleString("en-US") : String(n)) + suffix,
+  };
+}
+
+// Antes de que el contador entre en pantalla se muestra en 0, para que no
+// salte de la cifra final a 0 al arrancar. La cifra real queda en
+// data-countup-final (y en el HTML, para buscadores y sin JavaScript).
+function prepareCounter(el) {
+  const original = el.textContent.trim();
+  const counter = parseCounter(original);
+  if (!counter || prefersReducedMotion()) return false;
+  el.dataset.countupFinal = original;
+  el.textContent = counter.format(0);
+  return true;
+}
+
+function countUp(el) {
+  const original = el.dataset.countupFinal;
+  const counter = original && parseCounter(original);
+  if (!counter) return;
+
+  const { target, format } = counter;
   const duration = 1400;
   const start = performance.now();
 
@@ -105,7 +129,6 @@ function countUp(el) {
 // el conteo de los [data-countup]. Sin IntersectionObserver todo se muestra.
 function initReveal() {
   const revealNodes = document.querySelectorAll("[data-reveal], [data-reveal-stagger]");
-  const counters = document.querySelectorAll("[data-countup]");
 
   document.querySelectorAll("[data-reveal-stagger]").forEach((container) => {
     indexStaggerChildren(container);
@@ -116,6 +139,11 @@ function initReveal() {
     revealNodes.forEach((el) => el.classList.add("is-visible"));
     return;
   }
+
+  // A partir de aquí el CSS oculta lo que todavía no entra en pantalla (ver
+  // styles.css); sin esta clase todo se ve normal.
+  document.documentElement.classList.add("js-reveal");
+  const counters = [...document.querySelectorAll("[data-countup]")].filter(prepareCounter);
 
   const revealObserver = new IntersectionObserver(
     (entries) => {
@@ -142,18 +170,38 @@ function initReveal() {
   counters.forEach((el) => counterObserver.observe(el));
 }
 
+// Como el contenido de la página se inyecta vía fetch (data-include), el
+// salto nativo del navegador a un #ancla en la URL suele dispararse ANTES
+// de que ese contenido exista en el DOM, así que no llega a ningún lado.
+// Se reintenta el scroll a mano una vez que los partials ya están listos.
 function scrollToHashTarget() {
   if (!location.hash) return;
-  document.querySelector(location.hash)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  let id = location.hash.slice(1);
+  try {
+    id = decodeURIComponent(id);
+  } catch {
+    // Hash mal codificado: se usa tal cual.
+  }
+  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+// Un error en una parte no debe dejar sin arrancar a las demás (p. ej., sin
+// initReveal el contenido animado se quedaría oculto).
+function safely(fn) {
+  try {
+    fn();
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
   await includePartials();
-  setActiveNavLink();
-  initComunidadDropdown();
-  initMobileMenu();
-  initLeadForm();
-  initReveal();
+  safely(initReveal);
+  safely(setActiveNavLink);
+  safely(initComunidadDropdown);
+  safely(initMobileMenu);
+  safely(initLeadForm);
 
   await Promise.allSettled([
     renderPromos(),

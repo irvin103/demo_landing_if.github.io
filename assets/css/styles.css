@@ -2,9 +2,6 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Widget de chat (@n8n/chat): mismos colores que el tema de Tailwind.
-   Los nombres de variables son los de @n8n/chat 1.x (ojo: "--color--primary"
-   lleva doble guion). */
 /* Valores de movimiento compartidos (entradas: 500-800 ms, salida suave
    tipo ease-out-quint; sin rebotes). */
 :root {
@@ -15,6 +12,9 @@ html {
   --motion-distance: 20px;
 }
 
+/* Widget de chat (@n8n/chat): mismos colores que el tema de Tailwind.
+   Los nombres de variables son los de @n8n/chat 1.x (ojo: "--color--primary"
+   lleva doble guion). */
 :root {
   --chat--color--primary: #001590;
   --chat--color--primary-shade-50: #000f6b;
@@ -187,9 +187,11 @@ html {
    - [data-reveal-line]: las líneas de los títulos crecen desde el centro.
    Se usan @keyframes con `translate`/`scale` (no `transform` ni
    `transition`) para no chocar con los hover de Tailwind de las tarjetas;
-   `backwards` devuelve cada elemento a sus estilos originales al terminar. */
-[data-reveal]:not(.is-visible),
-[data-reveal-stagger]:not(.is-visible) > * {
+   `backwards` devuelve cada elemento a sus estilos originales al terminar.
+   Solo se ocultan cuando main.js ya arrancó (html.js-reveal): si el script
+   falla o no carga, el contenido se ve normal, sin animación. */
+html.js-reveal [data-reveal]:not(.is-visible),
+html.js-reveal [data-reveal-stagger]:not(.is-visible) > * {
   opacity: 0;
 }
 [data-reveal].is-visible,
@@ -257,11 +259,10 @@ html {
   height: 9rem;
   border-radius: 9999px;
   background: linear-gradient(to bottom, transparent, #e01c26, #001590, transparent);
-  transform: scaleY(0);
   transition: transform 0.9s var(--motion-ease-out) var(--reveal-delay, 0ms);
 }
-.cert-divider.is-visible {
-  transform: scaleY(1);
+html.js-reveal .cert-divider:not(.is-visible) {
+  transform: scaleY(0);
 }
 
 @keyframes cert-shine {
@@ -274,9 +275,12 @@ html {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-reveal]:not(.is-visible),
-  [data-reveal-stagger]:not(.is-visible) > * {
+  html.js-reveal [data-reveal]:not(.is-visible),
+  html.js-reveal [data-reveal-stagger]:not(.is-visible) > * {
     opacity: 1;
+  }
+  html.js-reveal .cert-divider:not(.is-visible) {
+    transform: none;
   }
   [data-reveal].is-visible,
   [data-reveal-stagger].is-visible > *,

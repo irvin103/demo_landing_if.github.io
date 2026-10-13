@@ -4,8 +4,9 @@
 // (backend/php/contacto.php), que valida, guarda un respaldo y manda el
 // correo a inscripciones@ con Resend. El JSON va como text/plain para evitar
 // la verificación previa (preflight) de CORS; el backend la soporta igual.
-// Mientras el endpoint esté vacío, se abre la app de correo del visitante con
-// el mensaje ya escrito para FORM_CONFIG.destinatario.
+// Mientras el endpoint esté vacío, se intenta abrir la app de correo del
+// visitante con el mensaje ya escrito para FORM_CONFIG.destinatario (y se
+// muestra la dirección por si no tiene app de correo).
 //
 // Programa de interés: las páginas de programa enlazan a
 // index.html?programa=<id>&nivel=<nivel>#lead-form; aquí se lee esa URL y se
@@ -55,8 +56,10 @@ function validar(form) {
   };
 
   check(nombre, nombre.value.trim().length >= 2, "Escribe tu nombre.");
-  const digitos = telefono.value.replace(/\D/g, "");
-  check(telefono, digitos.length === 0 || digitos.length >= 10, "Escribe un teléfono de 10 dígitos.");
+  // Igual que el backend: dígitos y separadores comunes (espacios, + ( ) . -).
+  const tel = telefono.value.trim();
+  const digitos = tel.replace(/\D/g, "");
+  check(telefono, tel === "" || (/^[0-9 +().-]+$/.test(tel) && digitos.length >= 10), "Escribe un teléfono de 10 dígitos.");
   check(email, EMAIL_RE.test(email.value.trim()), "Escribe un correo válido, por ejemplo nombre@correo.com.");
   check(consentimiento, consentimiento.checked, "Necesitamos tu autorización para contactarte.");
   return errores;
@@ -73,7 +76,8 @@ function datosDe(form) {
     programaNombre: form.dataset.programaNombre || "",
     nivel: f.nivel.value,
     pagina: location.href,
-    fecha: new Date().toISOString(),
+    // Campo trampa: lo revisa el backend, que además registra cuando se activa.
+    campo_extra: f.campo_extra.value,
   };
 }
 
@@ -114,6 +118,8 @@ async function aplicarProgramaDeUrl(form) {
   const nivel = params.get("nivel") || "";
   form.elements.programa.value = id;
   form.elements.nivel.value = nivel;
+  // Sin esto, al volver a una URL sin programa se mandaría el nombre del anterior.
+  form.dataset.programaNombre = "";
   if (!id) return;
 
   const nombre = await nombrePrograma(id, nivel);
@@ -147,8 +153,6 @@ export function initLeadForm() {
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    // Campo trampa: las personas no lo ven; si trae algo, es un bot.
-    if (form.elements.empresa.value) return;
 
     const errores = validar(form);
     if (errores.length) {
@@ -161,10 +165,13 @@ export function initLeadForm() {
 
     if (!FORM_CONFIG.endpoint) {
       abrirCorreo(datos);
+      // No se puede saber si el teléfono o la computadora tiene app de correo:
+      // se deja el enlace y la dirección a la vista por si no se abrió nada.
       mostrarEstado(
         form,
         "info",
-        `Abrimos tu app de correo con el mensaje listo para ${FORM_CONFIG.destinatario}. Solo falta que lo envíes.`
+        "Intentamos abrir tu app de correo con el mensaje listo; solo falta que lo envíes. Si no se abrió, escríbenos a",
+        true
       );
       return;
     }

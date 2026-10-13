@@ -34,12 +34,22 @@ return [
     // Respaldo de cada solicitud en CSV (fuera de public_html). '' = desactivado.
     'LEADS_CSV' => '/home/USUARIO/fleming-formulario/solicitudes.csv',
 
-    // Carpeta para los límites anti-abuso (fuera de public_html).
+    // Carpeta para los límites anti-abuso (fuera de public_html). Obligatoria:
+    // si no se puede crear o escribir, el formulario responde "configuracion".
     'RATE_DIR' => '/home/USUARIO/fleming-formulario/limites',
 
-    // Anti-abuso: 1 envío por correo cada 60 s; 5 por IP cada 10 min; tope diario.
+    // Log de errores (sin datos personales). Vacío = errores.log junto a este archivo.
+    'ERROR_LOG' => '',
+
+    // Solo si el sitio queda detrás de un proxy como Cloudflare: encabezado con
+    // la IP real del visitante, p. ej. 'HTTP_CF_CONNECTING_IP'. Sin proxy debe
+    // quedar vacío (cualquiera podría falsificar ese encabezado).
+    'IP_HEADER' => '',
+
+    // Anti-abuso: 1 envío por correo cada 60 s; 5 intentos por IP cada 10 min;
+    // tope diario. El plan gratis de Resend permite 100 correos al día.
     'SEGUNDOS_ENTRE_MENSAJES' => 60,
     'LIMITE_POR_IP' => 5,
     'VENTANA_IP_SEGUNDOS' => 600,
-    'LIMITE_DIARIO' => 200,
+    'LIMITE_DIARIO' => 100,
 ];

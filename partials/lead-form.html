@@ -1,7 +1,7 @@
 <section id="lead-form" class="py-16 bg-gray-100 dark:bg-gray-800 scroll-mt-24">
   <div class="container mx-auto px-4 lg:px-8">
     <div data-reveal class="bg-surface-light dark:bg-surface-dark rounded-3xl shadow-xl overflow-hidden p-6 lg:p-10 flex flex-col lg:flex-row gap-10">
-      <form id="lead-form-el" class="lg:w-1/2 flex flex-col gap-5" novalidate aria-labelledby="lead-form-title">
+      <form id="lead-form-el" method="post" class="lg:w-1/2 flex flex-col gap-5" novalidate aria-labelledby="lead-form-title">
         <div>
           <h2 id="lead-form-title" class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Resuelve tus dudas</h2>
           <p class="text-sm text-secondary-text-light dark:text-secondary-text-dark mt-1">Escribe tu duda o sugerencia, en breve te atenderemos.</p>
@@ -10,18 +10,18 @@
         <div class="flex flex-col gap-4">
           <div data-field>
             <label for="lf-nombre" class="sr-only">Nombre</label>
-            <input id="lf-nombre" name="nombre" class="w-full bg-background-light dark:bg-gray-700 border-0 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary dark:text-white" placeholder="Nombre" type="text" autocomplete="name" required />
-            <p data-error hidden class="text-xs text-red-600 mt-1"></p>
+            <input id="lf-nombre" name="nombre" class="w-full bg-background-light dark:bg-gray-700 border-0 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary dark:text-white" placeholder="Nombre" type="text" autocomplete="name" required aria-describedby="lf-nombre-error" />
+            <p id="lf-nombre-error" data-error hidden class="text-xs text-red-600 dark:text-red-300 mt-1"></p>
           </div>
           <div data-field>
             <label for="lf-telefono" class="sr-only">Teléfono (opcional)</label>
-            <input id="lf-telefono" name="telefono" class="w-full bg-background-light dark:bg-gray-700 border-0 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary dark:text-white" placeholder="Teléfono" type="tel" autocomplete="tel" inputmode="tel" />
-            <p data-error hidden class="text-xs text-red-600 mt-1"></p>
+            <input id="lf-telefono" name="telefono" class="w-full bg-background-light dark:bg-gray-700 border-0 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary dark:text-white" placeholder="Teléfono" type="tel" autocomplete="tel" inputmode="tel" aria-describedby="lf-telefono-error" />
+            <p id="lf-telefono-error" data-error hidden class="text-xs text-red-600 dark:text-red-300 mt-1"></p>
           </div>
           <div data-field>
             <label for="lf-email" class="sr-only">Email</label>
-            <input id="lf-email" name="email" class="w-full bg-background-light dark:bg-gray-700 border-0 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary dark:text-white" placeholder="Email" type="email" autocomplete="email" required />
-            <p data-error hidden class="text-xs text-red-600 mt-1"></p>
+            <input id="lf-email" name="email" class="w-full bg-background-light dark:bg-gray-700 border-0 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary dark:text-white" placeholder="Email" type="email" autocomplete="email" required aria-describedby="lf-email-error" />
+            <p id="lf-email-error" data-error hidden class="text-xs text-red-600 dark:text-red-300 mt-1"></p>
           </div>
           <div data-field>
             <label for="lf-mensaje" class="sr-only">Mensaje</label>
@@ -30,18 +30,20 @@
 
           <input type="hidden" name="programa" />
           <input type="hidden" name="nivel" />
-          <!-- Campo trampa para bots: oculto a las personas y a lectores de pantalla. -->
-          <div class="hidden" aria-hidden="true">
-            <label for="lf-empresa">Empresa</label>
-            <input id="lf-empresa" name="empresa" type="text" tabindex="-1" autocomplete="off" />
+          <!-- Campo trampa para bots: oculto a las personas y a lectores de pantalla.
+               Se oculta con estilo propio (no depende de Tailwind) y su nombre no
+               significa nada para el autollenado del navegador. -->
+          <div aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden">
+            <label for="lf-campo-extra">Deja este campo vacío</label>
+            <input id="lf-campo-extra" name="campo_extra" type="text" tabindex="-1" autocomplete="off" />
           </div>
 
           <div data-field>
             <label class="flex items-start gap-2 text-xs text-secondary-text-light dark:text-secondary-text-dark">
-              <input id="lf-consentimiento" name="consentimiento" type="checkbox" class="mt-0.5 rounded border-gray-300 text-primary focus:ring-primary" required />
+              <input id="lf-consentimiento" name="consentimiento" type="checkbox" class="mt-0.5 rounded border-gray-300 text-primary focus:ring-primary" required aria-describedby="lf-consentimiento-error" />
               <span>Acepto el <a href="aviso-privacidad.html" class="text-primary font-semibold hover:underline" target="_blank" rel="noopener">aviso de privacidad</a> y que me contacten para darme información.</span>
             </label>
-            <p data-error hidden class="text-xs text-red-600 mt-1"></p>
+            <p id="lf-consentimiento-error" data-error hidden class="text-xs text-red-600 dark:text-red-300 mt-1"></p>
           </div>
         </div>
 
