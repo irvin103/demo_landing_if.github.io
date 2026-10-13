@@ -25,7 +25,7 @@ demo_landing_if.github.io/
 ├── index.html                       # Home
 ├── nosotros.html                    # Página "Nosotros"
 ├── aviso-privacidad.html            # Aviso de privacidad (contenido estático)
-├── backend/apps-script/             # Backend del formulario (Google Apps Script): hoja + correo a inscripciones@
+├── backend/php/                     # Backend del formulario (PHP en HostGator + Resend): respaldo CSV + correo a inscripciones@
 ├── <programa>.html × 19             # Una página por programa académico (ver más abajo)
 │
 ├── partials/
@@ -110,7 +110,7 @@ Luego abre `http://localhost:8080`.
 - **`assets/js/n8n-chat.js`** apunta a un webhook de **ngrok temporal** (`WEBHOOK_URL`); se ha tenido que actualizar varias veces (ver historial de commits). Debe reemplazarse por un endpoint estable antes de depender de él en producción.
 - **Mascota del chat:** el botón propio del chat busca `assets/img/mascota.webp` (idealmente PNG/WebP con fondo transparente, cuadrado, ~200 px). Mientras no exista, muestra un ícono de respaldo; al agregar el archivo aparece la mascota con su animación, sin tocar código. El globo "¿En qué puedo ayudarte?" sale a los 2 s y no vuelve a salir en la sesión si se cierra.
 - **Versión de `@n8n/chat`:** fijada en 1.40.1 en `n8n-chat.js` y en el `<link>` del CSS de cada página; actualizar ambos juntos.
-- **Formulario de contacto** (`assets/js/lead-form.js`): valida, precarga el programa cuando se llega desde una página de programa (`?programa=&nivel=`) y pide aceptar el aviso de privacidad. Envía a un backend en Google Apps Script (`backend/apps-script/`) que guarda cada solicitud en una hoja de Google y manda el correo a inscripciones@institutofleming.com. **Falta desplegarlo** (ver `backend/apps-script/README.md`) y poner su URL en `FORM_CONFIG.endpoint`; mientras esté vacío, "Enviar" abre la app de correo del visitante con el mensaje listo.
+- **Formulario de contacto** (`assets/js/lead-form.js`): valida, precarga el programa cuando se llega desde una página de programa (`?programa=&nivel=`) y pide aceptar el aviso de privacidad. Envía a un backend PHP (`backend/php/contacto.php`) que se sube al hosting de HostGator, guarda un respaldo CSV y manda el correo a inscripciones@institutofleming.edu.mx con Resend. **Falta desplegarlo** (ver `backend/php/README.md`) y poner su URL en `FORM_CONFIG.endpoint`; mientras esté vacío, "Enviar" abre la app de correo del visitante con el mensaje listo.
 - Algunas fotos de programas (`turismo.jpg`, `puericultura.jpg`, `psicopedagogia.jfif`) tienen resolución nativa baja y pueden verse un poco suaves incluso en el tamaño más chico — requeriría fotografía de mayor resolución para corregirse del todo.
 - **`assets/img/turismo_2.webp`** no está enlazado desde ningún programa (solo se usa `turismo.jpg`).
 - **`data/form-options.json`** ya no se usa en ningún lado (quedó de una versión anterior del formulario). Se dejó en el repo por si se retoma, pero no forma parte del flujo activo.

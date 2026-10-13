@@ -1,11 +1,11 @@
 // Formulario "Resuelve tus dudas" (partials/lead-form.html).
 //
-// Envío: FORM_CONFIG.endpoint es la URL de la aplicación web de Google Apps
-// Script (backend/apps-script/Code.gs), que guarda la solicitud en una hoja y
-// manda el correo a inscripciones@. El JSON va como text/plain porque Apps
-// Script no responde la verificación previa (preflight) de CORS. Mientras el
-// endpoint esté vacío, se abre la app de correo del visitante con el mensaje
-// ya escrito para FORM_CONFIG.destinatario.
+// Envío: FORM_CONFIG.endpoint es el backend PHP en el hosting del instituto
+// (backend/php/contacto.php), que valida, guarda un respaldo y manda el
+// correo a inscripciones@ con Resend. El JSON va como text/plain para evitar
+// la verificación previa (preflight) de CORS; el backend la soporta igual.
+// Mientras el endpoint esté vacío, se abre la app de correo del visitante con
+// el mensaje ya escrito para FORM_CONFIG.destinatario.
 //
 // Programa de interés: las páginas de programa enlazan a
 // index.html?programa=<id>&nivel=<nivel>#lead-form; aquí se lee esa URL y se
@@ -13,9 +13,11 @@
 // recargar, y avisa con el evento "leadform:programa".
 
 const FORM_CONFIG = {
-  // URL de la aplicación web de Apps Script (termina en /exec). Vacío = solo correo.
+  // URL del backend, p. ej. "https://institutofleming.edu.mx/api/contacto.php".
+  // Vacío = solo correo.
   endpoint: "",
-  destinatario: "inscripciones@institutofleming.com",
+  // institutofleming.com no existe; el dominio del instituto es .edu.mx.
+  destinatario: "inscripciones@institutofleming.edu.mx",
   asunto: "Solicitud de información desde el sitio web",
 };
 
@@ -100,7 +102,7 @@ function mostrarEstado(form, tipo, texto, conCorreo = false) {
 }
 
 const MENSAJES_ERROR = {
-  limite: "Ya recibimos un mensaje tuyo hace un momento. Si necesitas agregar algo, espera un minuto o escríbenos a",
+  limite: "Recibimos tu mensaje hace poco. Si necesitas agregar algo, espera unos minutos o escríbenos a",
   email: "Revisa tu correo electrónico e inténtalo de nuevo.",
   nombre: "Revisa tu nombre e inténtalo de nuevo.",
   telefono: "Revisa tu teléfono e inténtalo de nuevo.",
@@ -176,8 +178,8 @@ export function initLeadForm() {
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(datos),
       });
-      if (!res.ok) throw new Error(String(res.status));
-      const r = await res.json();
+      // El backend responde JSON {ok, error} también con códigos 4xx/5xx.
+      const r = await res.json().catch(() => ({ ok: false, error: "http-" + res.status }));
       if (r.ok) {
         form.reset();
         form.elements.mensaje.dataset.autollenado = "false";
