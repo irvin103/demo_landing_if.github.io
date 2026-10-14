@@ -16,6 +16,8 @@ const BUBBLE_TEXT = "¿En qué puedo ayudarte?";
 // El globo se presenta en cada carga de página; abrir el chat o cerrarlo con
 // la X solo lo esconde mientras se está en esa página.
 const BUBBLE_DELAY_MS = 1800;
+// Debe coincidir con la media query de la mascota compacta en styles.css.
+const PANTALLA_BAJA = "(max-height: 599px)";
 
 createChat({
   webhookUrl: WEBHOOK_URL,
@@ -108,8 +110,22 @@ function initLauncher() {
     attributeFilter: ["style", "class"],
   });
 
-  setTimeout(() => {
+  const mostrarBubble = () => {
     if (!chatAbierto()) bubble.hidden = false;
+  };
+  setTimeout(() => {
+    // En pantallas bajas (celulares chicos o en horizontal) el globo taparía
+    // el botón principal del hero: espera a que la persona baje un poco.
+    if (window.matchMedia(PANTALLA_BAJA).matches && window.scrollY < 120) {
+      const alBajar = () => {
+        if (window.scrollY < 120) return;
+        window.removeEventListener("scroll", alBajar);
+        if (!launcher.classList.contains("is-open")) mostrarBubble();
+      };
+      window.addEventListener("scroll", alBajar, { passive: true });
+      return;
+    }
+    mostrarBubble();
   }, BUBBLE_DELAY_MS);
 }
 

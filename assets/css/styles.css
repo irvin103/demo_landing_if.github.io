@@ -163,6 +163,21 @@ html {
   60%      { transform: translateY(-4px) rotate(3deg); }
 }
 
+/* Pantallas bajas (celulares chicos o en horizontal): mascota del tamaño del
+   ícono original y globo más chico, para tapar menos contenido. Debe
+   coincidir con PANTALLA_BAJA en n8n-chat.js. */
+@media (max-height: 599px) {
+  .chat-launcher.has-mascota .chat-launcher__button {
+    width: 64px;
+    height: 64px;
+  }
+  .chat-launcher__bubble {
+    max-width: 170px;
+    margin-bottom: 10px;
+    font-size: 0.8rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .chat-launcher__bubble,
   .chat-launcher.has-mascota .chat-launcher__mascota {
@@ -335,6 +350,24 @@ html.js-reveal .cert-divider:not(.is-visible) {
 .dark .map-bg {
   opacity: 0.1;
   filter: invert(1);
+}
+
+/* Tarjetas de "Nuestros Valores" en celulares: "Empoderamiento" no cabía en
+   anchos menores a ~408 px y se salía de la tarjeta. Menos separación y
+   relleno (y, en los más angostos, letra un poco más chica) para que cada
+   palabra quepa completa. */
+@media (max-width: 419px) {
+  [data-reveal-stagger].grid-cols-2.sm\:grid-cols-3 {
+    gap: 0.75rem;
+  }
+  [data-reveal-stagger].grid-cols-2.sm\:grid-cols-3 > div {
+    padding: 1.25rem 0.75rem;
+  }
+}
+@media (max-width: 359px) {
+  [data-reveal-stagger].grid-cols-2.sm\:grid-cols-3 > div > h3 {
+    font-size: 0.75rem;
+  }
 }
 
 /* El botón del chat (fijo abajo a la derecha, ~104 px de alto con su
