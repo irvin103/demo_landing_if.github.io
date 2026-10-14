@@ -1,0 +1,54 @@
+<!-- Contenido del modal "Aviso de privacidad" (lo carga assets/js/aviso-privacidad.js).
+     Es un resumen del aviso integral (assets/docs/aviso-privacidad-instituto-fleming.pdf);
+     cualquier cambio de fondo debe hacerse primero en ese documento. -->
+<div class="flex items-start justify-between gap-4 px-6 pt-6 pb-4 border-b border-gray-200 dark:border-gray-700">
+  <div>
+    <h2 id="aviso-privacidad-titulo" class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">Aviso de privacidad</h2>
+    <p class="text-sm text-secondary-text-light dark:text-secondary-text-dark mt-1">Versión resumida</p>
+  </div>
+  <button type="button" data-cerrar-aviso class="shrink-0 p-2 -m-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-white transition-colors" aria-label="Cerrar aviso de privacidad">
+    <span class="material-icons" aria-hidden="true">close</span>
+  </button>
+</div>
+
+<div class="aviso-cuerpo px-6 py-4 overflow-y-auto text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+  <dl class="grid gap-4 md:grid-cols-2 md:gap-x-8 md:gap-y-3">
+    <div>
+      <dt class="font-semibold text-gray-900 dark:text-white">Responsable</dt>
+      <dd>Colegio de Posgrados a Distancia de la Ciudad de México S.C. (Instituto Fleming / Universidad Fleming), Calzada Ermita Iztapalapa 1405, Col. San Pablo, Alcaldía Iztapalapa, C.P. 09000, Ciudad de México.</dd>
+    </div>
+    <div>
+      <dt class="font-semibold text-gray-900 dark:text-white">Datos que tratamos</dt>
+      <dd>Identificación y contacto (nombre, domicilio, correo, teléfono, edad y fecha de nacimiento); de pago, solo si contratas en línea; y de navegación (IP, páginas visitadas, dispositivo y navegador). No tratamos datos sensibles.</dd>
+    </div>
+    <div>
+      <dt class="font-semibold text-gray-900 dark:text-white">Para qué los usamos</dt>
+      <dd>
+        <strong class="font-semibold">Necesarias:</strong> identificarte, darte los servicios educativos que contrates, procesar pagos y prevenir fraudes, y cumplir obligaciones legales.
+        <strong class="font-semibold">Adicionales:</strong> promociones, eventos y novedades; encuestas de calidad, estadísticas y mercadotecnia.
+        Puedes negarte a las adicionales escribiendo a <a href="mailto:info@institutofleming.edu.mx" class="text-primary font-semibold hover:underline dark:text-brand-light">info@institutofleming.edu.mx</a>.
+      </dd>
+    </div>
+    <div>
+      <dt class="font-semibold text-gray-900 dark:text-white">Con quién los compartimos</dt>
+      <dd>Nunca vendemos tus datos. Solo los compartimos con entidades asociadas y proveedores que trabajan a nuestro nombre (servicios en la nube, pagos, atención y análisis), algunos fuera de México, y con autoridades cuando la ley lo exige.</dd>
+    </div>
+    <div>
+      <dt class="font-semibold text-gray-900 dark:text-white">Tus derechos</dt>
+      <dd>Puedes acceder, rectificar, cancelar u oponerte al uso de tus datos (derechos ARCO), revocar tu consentimiento o limitar su uso. Envía tu solicitud con copia de tu identificación a <a href="mailto:info@institutofleming.edu.mx" class="text-primary font-semibold hover:underline dark:text-brand-light">info@institutofleming.edu.mx</a>; respondemos en un máximo de 20 días.</dd>
+    </div>
+    <div>
+      <dt class="font-semibold text-gray-900 dark:text-white">Cookies, conservación y menores</dt>
+      <dd>Usamos cookies para que el sitio funcione, analizar su uso y mostrarte publicidad; puedes desactivarlas en tu navegador. Conservamos tus datos mientras dure la relación académica o lo exija la ley, y no recabamos datos de menores de 18 años sin el consentimiento de sus padres o tutores.</dd>
+    </div>
+  </dl>
+  <p class="mt-4 text-xs text-secondary-text-light dark:text-secondary-text-dark">Resumen informativo; en caso de discrepancia prevalece el aviso integral.</p>
+</div>
+
+<div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60">
+  <a href="assets/docs/aviso-privacidad-instituto-fleming.pdf" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-1 text-sm font-semibold text-primary hover:underline dark:text-brand-light">
+    <span class="material-icons text-base" aria-hidden="true">description</span>
+    Aviso de privacidad integral (PDF)
+  </a>
+  <button type="button" data-cerrar-aviso class="w-full sm:w-auto bg-primary hover:bg-primary-hover text-white font-semibold px-6 py-2.5 rounded-lg transition-colors">Entendido</button>
+</div>

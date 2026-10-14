@@ -6,7 +6,7 @@ Sitio web multi-página para el **Instituto Fleming**, construido como sitio est
 
 - **`index.html`** — Home: hero, promociones, oferta educativa (con detalle por nivel en un modal), planteles, estadísticas y el formulario de contacto ("Resuelve tus dudas").
 - **`nosotros.html`** — Historia del instituto y misión/visión/valores.
-- **`aviso-privacidad.html`** — Aviso de privacidad completo (transcrito del PDF oficial, sin cambios de redacción), con resumen, índice navegable y descarga del PDF. Enlazado desde el footer.
+- **Aviso de privacidad** — No es una página: es un modal con la versión resumida (`partials/aviso-privacidad.html`, lo abre `assets/js/aviso-privacidad.js`) desde el footer y la casilla del formulario, con enlace al aviso integral en PDF (`assets/docs/aviso-privacidad-instituto-fleming.pdf`). Sin JavaScript, esos enlaces abren el PDF.
 - **19 páginas de programa** (`bachillerato-gastronomia.html`, `licenciatura-derecho.html`, `ingenieria-industrial.html`, etc.) — una página dedicada por programa académico, con imagen principal, tabs verticales de detalle y botón de contacto. Ver la sección "Páginas de programa" más abajo.
 
 ## ¿Cómo funciona?
@@ -24,7 +24,6 @@ Al depender de `fetch` para partials y datos, el sitio necesita servirse por HTT
 demo_landing_if.github.io/
 ├── index.html                       # Home
 ├── nosotros.html                    # Página "Nosotros"
-├── aviso-privacidad.html            # Aviso de privacidad (contenido estático)
 ├── backend/php/                     # Backend del formulario (PHP en HostGator + Resend): respaldo CSV + correo a inscripciones@
 ├── <programa>.html × 19             # Una página por programa académico (ver más abajo)
 │
@@ -39,6 +38,7 @@ demo_landing_if.github.io/
 │   ├── stats.html                   # Cita institucional + 3 estadísticas (contenido estático)
 │   ├── lead-form.html               # Formulario "Resuelve tus dudas" (id="lead-form") + video de YouTube Shorts
 │   ├── footer.html                  # Logo, contacto, redes sociales (layout de 3 columnas)
+│   ├── aviso-privacidad.html        # Contenido del modal del aviso de privacidad (versión resumida)
 │   ├── programa-detalle.html        # Skeleton compartido por las 19 páginas de programa
 │   └── nosotros/
 │       ├── hero.html                # Historia (1981, 45 años, +3,000 alumnos) + CTA
@@ -53,6 +53,7 @@ demo_landing_if.github.io/
 │   │   ├── main.js                  # Orquestador: inyecta partials, nav activo, menú móvil, animaciones al hacer scroll, scroll a #ancla
 │   │   ├── render-sections.js       # Toda la lógica de renderizado dinámico (ver detalle abajo)
 │   │   ├── lead-form.js             # Formulario de contacto: validación, programa precargado y envío
+│   │   ├── aviso-privacidad.js      # Abre el aviso de privacidad resumido en un modal (<dialog>)
 │   │   └── n8n-chat.js              # Widget de chat (@n8n/chat 1.40.1 fijada) + botón con la mascota y globo de diálogo
 │   ├── img/                         # Imágenes locales (logos, oferta, hero, planteles)
 │   └── docs/                        # PDFs oficiales: aviso de privacidad, reglamento universitario y escolar

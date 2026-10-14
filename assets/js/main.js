@@ -1,4 +1,5 @@
 import { initLeadForm } from "./lead-form.js";
+import { initAvisoPrivacidad } from "./aviso-privacidad.js";
 import { renderOferta, renderPlanteles, renderPromos, renderOfertaNavMenu, renderProgramaDetalle, initComunidadDropdown } from "./render-sections.js";
 
 async function includePartials() {
@@ -202,6 +203,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   safely(initComunidadDropdown);
   safely(initMobileMenu);
   safely(initLeadForm);
+  safely(initAvisoPrivacidad);
 
   await Promise.allSettled([
     renderPromos(),
