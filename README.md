@@ -114,7 +114,8 @@ Luego abre `http://localhost:8080`.
 - Algunas fotos de programas (`turismo.jpg`, `puericultura.jpg`, `psicopedagogia.jfif`) tienen resolución nativa baja y pueden verse un poco suaves incluso en el tamaño más chico — requeriría fotografía de mayor resolución para corregirse del todo.
 - **`assets/img/turismo_2.webp`** no está enlazado desde ningún programa (solo se usa `turismo.jpg`).
 - **`data/form-options.json`** ya no se usa en ningún lado (quedó de una versión anterior del formulario). Se dejó en el repo por si se retoma, pero no forma parte del flujo activo.
-- **`assets/img/logo-red-conocer.webp`** es provisional: se recortó de la imagen del sitio actual y usa la identidad anterior de CONOCER. Reemplazarlo por el archivo oficial cuando el cliente lo entregue (misma ruta, sin tocar código).
+- **`assets/img/logo-red-conocer.webp`** es el logo oficial que entregó el cliente ("red Conocer de prestadores de servicio, Entidad de Certificación y Evaluación").
+- **`assets/img/mascota.webp`** es el busto de la mascota "Alex Fleming" para el botón del chat (192 × 192, fondo transparente), recortado de la propuesta de mascota del cliente. Si el archivo falta, el botón muestra un ícono.
 
 ## Tecnologías utilizadas
 
