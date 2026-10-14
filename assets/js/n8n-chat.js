@@ -13,8 +13,9 @@ const WEBHOOK_URL = "https://shadowlike-braylee-alodially.ngrok-free.dev/webhook
 // respaldo; al colocar la imagen en esta ruta aparece sin tocar código.
 const MASCOTA_SRC = "assets/img/mascota.webp";
 const BUBBLE_TEXT = "¿En qué puedo ayudarte?";
+// El globo se presenta en cada carga de página; abrir el chat o cerrarlo con
+// la X solo lo esconde mientras se está en esa página.
 const BUBBLE_DELAY_MS = 1800;
-const BUBBLE_DISMISS_KEY = "fleming-chat-bubble-cerrado";
 
 createChat({
   webhookUrl: WEBHOOK_URL,
@@ -42,22 +43,6 @@ createChat({
   },
   enableStreaming: false,
 });
-
-function bubbleCerrado() {
-  try {
-    return sessionStorage.getItem(BUBBLE_DISMISS_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
-
-function recordarBubbleCerrado() {
-  try {
-    sessionStorage.setItem(BUBBLE_DISMISS_KEY, "1");
-  } catch {
-    /* sin almacenamiento: el globo vuelve a salir en la próxima página */
-  }
-}
 
 // El widget crea su propio botón (un <div>, sin soporte de teclado). Se oculta
 // por CSS y este botón lo acciona; la ventana del chat sigue siendo la de n8n.
@@ -89,7 +74,6 @@ function initLauncher() {
 
   const ocultarBubble = () => {
     bubble.hidden = true;
-    recordarBubbleCerrado();
   };
 
   const chatAbierto = () => {
@@ -124,11 +108,9 @@ function initLauncher() {
     attributeFilter: ["style", "class"],
   });
 
-  if (!bubbleCerrado()) {
-    setTimeout(() => {
-      if (!chatAbierto()) bubble.hidden = false;
-    }, BUBBLE_DELAY_MS);
-  }
+  setTimeout(() => {
+    if (!chatAbierto()) bubble.hidden = false;
+  }, BUBBLE_DELAY_MS);
 }
 
 if (document.readyState === "loading") {
