@@ -24,6 +24,8 @@ Al depender de `fetch` para partials y datos, el sitio necesita servirse por HTT
 demo_landing_if.github.io/
 ├── index.html                       # Home
 ├── nosotros.html                    # Página "Nosotros"
+├── favicon.ico                      # Ícono de la pestaña (16/32/48 px, emblema IMIFLE); en assets/img/ están apple-touch-icon e icon-192/512
+├── site.webmanifest                 # Íconos para Android / "agregar a pantalla de inicio"
 ├── backend/php/                     # Backend del formulario (PHP en HostGator + Resend): respaldo CSV + correo a inscripciones@
 ├── <programa>.html × 19             # Una página por programa académico (ver más abajo)
 │
