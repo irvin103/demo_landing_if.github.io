@@ -73,8 +73,6 @@ function initMobileMenu() {
   });
 }
 
-const prefersReducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
 // Numera los hijos de un [data-reveal-stagger] para escalonar su entrada
 // (ver styles.css). Se vuelve a llamar cuando llegan hijos nuevos, p. ej. las
 // tarjetas que se pintan desde los JSON después de cargar la página.
@@ -101,7 +99,8 @@ function parseCounter(text) {
 function prepareCounter(el) {
   const original = el.textContent.trim();
   const counter = parseCounter(original);
-  if (!counter || prefersReducedMotion()) return false;
+  // También con "reducir movimiento": un número que cambia no es desplazamiento.
+  if (!counter) return false;
   el.dataset.countupFinal = original;
   el.textContent = counter.format(0);
   return true;

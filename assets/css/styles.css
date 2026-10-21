@@ -289,25 +289,31 @@ html.js-reveal .cert-divider:not(.is-visible) {
   50%      { transform: translateY(-6px); }
 }
 
+/* Con "reducir movimiento" activado (en Windows: Efectos de animación
+   desactivados) las entradas siguen animadas, pero solo como desvanecido:
+   sin desplazamientos ni escalas, que son los que causan malestar. El
+   destello de la franja de certificación se conserva (una sola vez) y se
+   apagan las animaciones en bucle y el acercamiento del hero. Solo se cambia
+   el nombre de la animación para conservar el escalonado (animation-delay). */
+@keyframes reveal-fade {
+  from { opacity: 0; }
+}
 @media (prefers-reduced-motion: reduce) {
-  html.js-reveal [data-reveal]:not(.is-visible),
-  html.js-reveal [data-reveal-stagger]:not(.is-visible) > * {
-    opacity: 1;
+  [data-reveal].is-visible,
+  [data-reveal-stagger].is-visible > *,
+  .is-visible [data-reveal-line] {
+    animation-name: reveal-fade;
+  }
+  [data-hero-zoom] {
+    animation: none;
   }
   html.js-reveal .cert-divider:not(.is-visible) {
     transform: none;
-  }
-  [data-reveal].is-visible,
-  [data-reveal-stagger].is-visible > *,
-  .is-visible [data-reveal-line],
-  [data-hero-zoom] {
-    animation: none;
   }
   .cert-divider {
     transform: none;
     transition: none;
   }
-  .cert-card::after,
   .cert-card .cert-logo {
     animation: none !important;
   }
