@@ -119,6 +119,7 @@ Luego abre `http://localhost:8080`.
 - **`data/form-options.json`** ya no se usa en ningún lado (quedó de una versión anterior del formulario). Se dejó en el repo por si se retoma, pero no forma parte del flujo activo.
 - **`assets/img/logo-red-conocer.webp`** es el logo oficial que entregó el cliente ("red Conocer de prestadores de servicio, Entidad de Certificación y Evaluación").
 - **`assets/img/mascota.webp`** es el busto de la mascota "Alex Fleming" para el botón del chat (192 × 192, fondo transparente), recortado de la propuesta de mascota del cliente. Si el archivo falta, el botón muestra un ícono.
+- **`assets/img/mascota-animada.webp`** es la versión animada del mismo busto (176 × 176, WebP animado con transparencia, ~8 s por vuelta: voltea a un lado y al otro y mira de reojo). Es la que usa el botón; con "reducir movimiento" se muestra `mascota.webp`.
 
 ## Tecnologías utilizadas
 

@@ -76,6 +76,10 @@ html {
 .chat-launcher__mascota {
   display: none;
 }
+/* El <picture> (animada / fija) no debe afectar el tamaño de la imagen. */
+.chat-launcher__button picture {
+  display: contents;
+}
 
 /* Con la imagen de la mascota: sin círculo, la mascota "asoma" y respira. */
 .chat-launcher.has-mascota .chat-launcher__button {

@@ -12,6 +12,9 @@ const WEBHOOK_URL = "https://shadowlike-braylee-alodially.ngrok-free.dev/webhook
 // Imagen de la mascota. Mientras no exista el archivo se muestra un ícono de
 // respaldo; al colocar la imagen en esta ruta aparece sin tocar código.
 const MASCOTA_SRC = "assets/img/mascota.webp";
+// Versión animada (voltea a los lados y mira de reojo). Con "reducir
+// movimiento" el navegador usa la fija.
+const MASCOTA_ANIMADA_SRC = "assets/img/mascota-animada.webp";
 const BUBBLE_TEXT = "¿En qué puedo ayudarte?";
 // El globo se presenta en cada carga de página; abrir el chat o cerrarlo con
 // la X solo lo esconde mientras se está en esa página.
@@ -59,7 +62,10 @@ function initLauncher() {
       </button>
     </div>
     <button type="button" class="chat-launcher__button" aria-label="Abrir el chat con el asistente de Fleming" aria-expanded="false">
-      <img class="chat-launcher__mascota" src="${MASCOTA_SRC}" alt="" width="96" height="96" />
+      <picture>
+        <source media="(prefers-reduced-motion: reduce)" srcset="${MASCOTA_SRC}" />
+        <img class="chat-launcher__mascota" src="${MASCOTA_ANIMADA_SRC}" alt="" width="96" height="96" />
+      </picture>
       <span class="chat-launcher__fallback material-icons" aria-hidden="true">support_agent</span>
     </button>
   `;
