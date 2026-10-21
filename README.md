@@ -31,7 +31,7 @@ demo_landing_if.github.io/
 │
 ├── partials/
 │   ├── nav.html                     # Barra de navegación: logo, Inicio, dropdown "Oferta Educativa",
-│   │                                 #   Nosotros, dropdown "Comunidad" (redes sociales), teléfono/email
+│   │                                 #   Nosotros, dropdown "Comunidad" (redes sociales) y menú de celular
 │   ├── hero.html                    # Hero del home
 │   ├── promo-cards.html             # Contenedor de tarjetas promocionales (#promo-grid)
 │   ├── certificacion.html           # Franja animada red CONOCER + Universidad Fleming IMIFLE
@@ -39,7 +39,7 @@ demo_landing_if.github.io/
 │   ├── planteles.html               # Contenedor de tarjetas de planteles (#planteles-grid)
 │   ├── stats.html                   # Cita institucional + 3 estadísticas (contenido estático)
 │   ├── lead-form.html               # Formulario "Resuelve tus dudas" (id="lead-form") + video de YouTube Shorts
-│   ├── footer.html                  # Logo, contacto, redes sociales (layout de 3 columnas)
+│   ├── footer.html                  # Logo, redes sociales y enlaces legales (aviso de privacidad, reglamentos)
 │   ├── aviso-privacidad.html        # Contenido del modal del aviso de privacidad (versión resumida)
 │   ├── programa-detalle.html        # Skeleton compartido por las 19 páginas de programa
 │   └── nosotros/
