@@ -1,56 +1,69 @@
-<footer class="bg-[#2D5A5A] text-white pt-16 pb-8">
+<footer class="bg-brand-dark text-white pt-16 pb-8">
   <div class="container mx-auto px-4 lg:px-8">
-    <div class="flex flex-col md:flex-row items-center md:items-start justify-between gap-10 mb-12 text-center md:text-left">
-      <div class="flex items-center gap-2">
-        <span class="material-icons text-white text-5xl">school</span>
-        <div class="flex flex-col">
-          <span class="text-xl font-bold tracking-tight leading-none">INSTITUTO</span>
-          <span class="text-xl font-bold tracking-tight leading-none">FLEMING</span>
+    <div class="flex flex-col lg:flex-row items-center lg:items-start justify-between gap-10 mb-12 text-center lg:text-left">
+      <div class="flex items-center gap-3 shrink-0">
+        <img src="assets/img/logo-imifle-blanco.webp" alt="" width="480" height="459" class="h-16 w-auto" />
+        <div class="flex flex-col leading-none text-left">
+          <span class="text-[11px] font-semibold uppercase tracking-[0.25em] text-white/70">Instituto</span>
+          <span class="text-2xl font-extrabold tracking-tight">FLEMING</span>
         </div>
       </div>
 
-      <div class="flex flex-col items-center md:items-start gap-3">
+      <div class="flex flex-col items-center lg:items-start gap-3">
         <div class="flex items-center gap-3">
           <span class="material-icons text-sm">phone</span>
           <span>
-            <a href="tel:5556862752" class="hover:text-primary transition-colors">5556862752</a> / <a href="tel:5556858511" class="hover:text-primary transition-colors">5556858511</a>
+            <a href="tel:5556862752" class="hover:text-brand-light transition-colors">5556862752</a> / <a href="tel:5556858511" class="hover:text-brand-light transition-colors">5556858511</a>
           </span>
         </div>
 
         <div class="flex items-center gap-3">
           <span class="material-icons text-sm">email</span>
-          <a href="mailto:info@institutofleming.edu.mx" class="hover:text-primary transition-colors">info@institutofleming.edu.mx</a>
+          <a href="mailto:info@institutofleming.edu.mx" class="hover:text-brand-light transition-colors">info@institutofleming.edu.mx</a>
         </div>
       </div>
 
       <div class="flex gap-4">
         <a
-          class="w-10 h-10 rounded-full bg-white/10 hover:bg-primary flex items-center justify-center transition-colors duration-300"
+          class="w-10 h-10 rounded-full bg-white/10 hover:bg-white hover:text-brand-dark flex items-center justify-center transition-colors duration-300"
+          href="https://www.facebook.com/flemingmexico/"
+          aria-label="Facebook (se abre en otra pestaña)"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <i class="fab fa-facebook-f text-lg"></i>
+        </a>
+        <a
+          class="w-10 h-10 rounded-full bg-white/10 hover:bg-white hover:text-brand-dark flex items-center justify-center transition-colors duration-300"
           href="https://www.tiktok.com/@institutofleming.cdmx"
+          aria-label="TikTok (se abre en otra pestaña)"
           target="_blank"
           rel="noopener noreferrer"
         >
           <i class="fab fa-tiktok text-lg"></i>
         </a>
         <a
-          class="w-10 h-10 rounded-full bg-white/10 hover:bg-primary flex items-center justify-center transition-colors duration-300"
+          class="w-10 h-10 rounded-full bg-white/10 hover:bg-white hover:text-brand-dark flex items-center justify-center transition-colors duration-300"
           href="https://www.youtube.com/@INSTITUTOFLEMINGOFICIALCDMX"
+          aria-label="YouTube (se abre en otra pestaña)"
           target="_blank"
           rel="noopener noreferrer"
         >
           <i class="fab fa-youtube text-lg"></i>
         </a>
         <a
-          class="w-10 h-10 rounded-full bg-white/10 hover:bg-primary flex items-center justify-center transition-colors duration-300"
+          class="w-10 h-10 rounded-full bg-white/10 hover:bg-white hover:text-brand-dark flex items-center justify-center transition-colors duration-300"
           href="https://www.instagram.com/institutofleming_oficial/"
+          aria-label="Instagram (se abre en otra pestaña)"
           target="_blank"
           rel="noopener noreferrer"
         >
           <i class="fab fa-instagram text-lg"></i>
         </a>
         <a
-          class="w-10 h-10 rounded-full bg-white/10 hover:bg-primary flex items-center justify-center transition-colors duration-300"
+          class="w-10 h-10 rounded-full bg-white/10 hover:bg-white hover:text-brand-dark flex items-center justify-center transition-colors duration-300"
           href="https://api.whatsapp.com/send/?phone=5215523078269&amp;text&amp;type=phone_number&amp;app_absent=0"
+          aria-label="WhatsApp (se abre en otra pestaña)"
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -59,8 +72,13 @@
       </div>
     </div>
 
-    <div class="border-t border-white/20 pt-8 text-center text-xs text-gray-400">
-      <p>© 2023 Instituto Fleming. Todos los derechos reservados. | Aviso de Privacidad</p>
+    <div class="border-t border-white/20 pt-8 flex flex-col lg:flex-row items-center justify-between gap-4 text-xs text-white/60">
+      <p>© 2026 Instituto Fleming. Todos los derechos reservados.</p>
+      <nav aria-label="Documentos legales" class="flex flex-wrap justify-center gap-x-6 gap-y-2">
+        <a href="assets/docs/aviso-privacidad-instituto-fleming.pdf" data-aviso-privacidad target="_blank" rel="noopener" class="hover:text-white transition-colors">Aviso de privacidad</a>
+        <a href="assets/docs/reglamento-universitario.pdf" target="_blank" rel="noopener" class="hover:text-white transition-colors">Reglamento universitario (PDF)</a>
+        <a href="assets/docs/reglamento-escolar.pdf" target="_blank" rel="noopener" class="hover:text-white transition-colors">Reglamento escolar (PDF)</a>
+      </nav>
     </div>
   </div>
 </footer>

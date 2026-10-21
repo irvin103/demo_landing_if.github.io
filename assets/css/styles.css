@@ -2,6 +2,317 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Valores de movimiento compartidos (entradas: 500-800 ms, salida suave
+   tipo ease-out-quint; sin rebotes). */
+:root {
+  --motion-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-enter: 0.65s;
+  --motion-stagger: 80ms;
+  --motion-distance: 20px;
+}
+
+/* Widget de chat (@n8n/chat): mismos colores que el tema de Tailwind.
+   Los nombres de variables son los de @n8n/chat 1.x (ojo: "--color--primary"
+   lleva doble guion). */
+:root {
+  --chat--color--primary: #001590;
+  --chat--color--primary-shade-50: #000f6b;
+  --chat--color--primary--shade-100: #000b4d;
+  --chat--color--secondary: #2c4fc7;
+  --chat--color-secondary-shade-50: #2440a8;
+  --chat--color-dark: #000b4d;
+}
+
+/* --- Botón del chat con la mascota (ver n8n-chat.js) -------------------
+   El botón original del widget se oculta; la ventana de n8n sube para
+   dejar libre el botón propio. */
+#n8n-chat .chat-window-toggle {
+  display: none !important;
+}
+:root {
+  --chat--window--bottom: calc(1rem + 88px);
+}
+
+.chat-launcher {
+  position: fixed;
+  right: 1rem;
+  bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  z-index: 10000;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+  pointer-events: none;
+}
+.chat-launcher > * {
+  pointer-events: auto;
+}
+
+.chat-launcher__button {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border: 0;
+  border-radius: 9999px;
+  background: #001590;
+  color: #fff;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 8px 24px -6px rgba(0, 21, 144, 0.55);
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+.chat-launcher__button:hover {
+  background: #000f6b;
+  transform: scale(1.05);
+}
+.chat-launcher__button:focus-visible {
+  outline: 3px solid #a9b8ff;
+  outline-offset: 3px;
+}
+.chat-launcher__fallback {
+  font-size: 32px;
+}
+.chat-launcher__mascota {
+  display: none;
+}
+
+/* Con la imagen de la mascota: sin círculo, la mascota "asoma" y respira. */
+.chat-launcher.has-mascota .chat-launcher__button {
+  width: 88px;
+  height: 88px;
+  background: transparent;
+  box-shadow: none;
+}
+.chat-launcher.has-mascota .chat-launcher__mascota {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 14px rgba(0, 11, 77, 0.35));
+  animation: mascota-respira 4s ease-in-out infinite;
+  transform-origin: 50% 100%;
+}
+.chat-launcher.has-mascota .chat-launcher__fallback {
+  display: none;
+}
+.chat-launcher.is-open .chat-launcher__mascota {
+  animation: none;
+}
+
+.chat-launcher__bubble {
+  position: relative;
+  max-width: 220px;
+  margin-bottom: 18px;
+  padding: 0.75rem 2.25rem 0.75rem 1rem;
+  border-radius: 1rem 1rem 0.25rem 1rem;
+  background: #fff;
+  color: #000b4d;
+  font-weight: 600;
+  font-size: 0.9rem;
+  line-height: 1.35;
+  box-shadow: 0 10px 30px -8px rgba(0, 11, 77, 0.35);
+  transform-origin: 100% 100%;
+  animation: bubble-entra 0.5s var(--motion-ease-expo) both,
+    bubble-flota 5s ease-in-out 0.6s infinite;
+}
+/* Colita del globo apuntando al botón. */
+.chat-launcher__bubble::after {
+  content: "";
+  position: absolute;
+  right: -6px;
+  bottom: 10px;
+  width: 14px;
+  height: 14px;
+  background: inherit;
+  transform: rotate(45deg);
+  border-radius: 2px;
+}
+.chat-launcher__bubble-close {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 9999px;
+  background: transparent;
+  color: #5a6280;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.chat-launcher__bubble-close:hover {
+  background: #eef1fb;
+}
+.chat-launcher__bubble-close .material-icons {
+  font-size: 16px;
+}
+
+@keyframes bubble-entra {
+  from { opacity: 0; transform: translateY(8px) scale(0.85); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes bubble-flota {
+  0%, 100% { translate: 0 0; }
+  50%      { translate: 0 -4px; }
+}
+@keyframes mascota-respira {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  40%      { transform: translateY(-4px) rotate(-3deg); }
+  60%      { transform: translateY(-4px) rotate(3deg); }
+}
+
+/* Pantallas bajas (celulares chicos o en horizontal): mascota del tamaño del
+   ícono original y globo más chico, para tapar menos contenido. Debe
+   coincidir con PANTALLA_BAJA en n8n-chat.js. */
+@media (max-height: 599px) {
+  .chat-launcher.has-mascota .chat-launcher__button {
+    width: 64px;
+    height: 64px;
+  }
+  .chat-launcher__bubble {
+    max-width: 170px;
+    margin-bottom: 10px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-launcher__bubble,
+  .chat-launcher.has-mascota .chat-launcher__mascota {
+    animation: none;
+  }
+}
+
+/* --- Formulario de contacto: aviso de estado (ver lead-form.js) -------- */
+#lead-form-el [data-status="ok"] {
+  background: #e7f6ee;
+  color: #14532d;
+}
+#lead-form-el [data-status="error"] {
+  background: #fdecec;
+  color: #991b1b;
+}
+
+/* --- Animaciones de entrada (ver initReveal en main.js) -----------------
+   - [data-reveal]: el elemento sube y aparece al entrar en pantalla.
+   - [data-reveal-stagger]: lo mismo para cada hijo directo, escalonado
+     (--reveal-i lo asigna main.js, también a los hijos que llegan después).
+   - [data-reveal-line]: las líneas de los títulos crecen desde el centro.
+   Se usan @keyframes con `translate`/`scale` (no `transform` ni
+   `transition`) para no chocar con los hover de Tailwind de las tarjetas;
+   `backwards` devuelve cada elemento a sus estilos originales al terminar.
+   Solo se ocultan cuando main.js ya arrancó (html.js-reveal): si el script
+   falla o no carga, el contenido se ve normal, sin animación. */
+html.js-reveal [data-reveal]:not(.is-visible),
+html.js-reveal [data-reveal-stagger]:not(.is-visible) > * {
+  opacity: 0;
+}
+[data-reveal].is-visible,
+[data-reveal-stagger].is-visible > * {
+  animation: reveal-up var(--motion-enter) var(--motion-ease-out) backwards;
+  animation-delay: calc(var(--reveal-delay, 0ms) + var(--reveal-i, 0) * var(--motion-stagger));
+}
+.is-visible [data-reveal-line] {
+  animation: reveal-line 0.8s var(--motion-ease-expo) 0.15s backwards;
+}
+[data-hero-zoom] {
+  animation: hero-zoom 1.6s var(--motion-ease-out) backwards;
+}
+
+@keyframes reveal-up {
+  from { opacity: 0; translate: 0 var(--motion-distance); }
+}
+@keyframes reveal-line {
+  from { scale: 0 1; }
+}
+@keyframes hero-zoom {
+  from { scale: 1.06; }
+}
+
+/* --- Franja de certificación (red CONOCER + IMIFLE) --------------------- */
+.cert-glow {
+  background:
+    radial-gradient(40rem 18rem at 20% 60%, rgba(224, 28, 38, 0.06), transparent 70%),
+    radial-gradient(40rem 18rem at 80% 60%, rgba(0, 21, 144, 0.08), transparent 70%);
+}
+
+.cert-card {
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  padding: 2rem;
+  border-radius: 1.5rem;
+  background: #fff;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.08);
+  outline: 1px solid rgba(0, 21, 144, 0.06);
+}
+/* Destello diagonal que recorre la tarjeta al aparecer y al pasar el cursor. */
+.cert-card::after {
+  content: "";
+  position: absolute;
+  inset: -50% auto -50% -60%;
+  width: 40%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.85), transparent);
+  transform: translateX(0) rotate(12deg);
+  pointer-events: none;
+}
+.cert-card.is-visible::after {
+  animation: cert-shine 1.4s ease-out calc(var(--reveal-delay, 0ms) + 500ms) 1 both;
+}
+.cert-card:hover::after {
+  animation: cert-shine 1s ease-out 1 both;
+}
+
+.cert-card.is-visible .cert-logo {
+  animation: cert-float 6s ease-in-out calc(var(--reveal-delay, 0ms) + 900ms) infinite;
+}
+
+.cert-divider {
+  width: 2px;
+  height: 9rem;
+  border-radius: 9999px;
+  background: linear-gradient(to bottom, transparent, #e01c26, #001590, transparent);
+  transition: transform 0.9s var(--motion-ease-out) var(--reveal-delay, 0ms);
+}
+html.js-reveal .cert-divider:not(.is-visible) {
+  transform: scaleY(0);
+}
+
+@keyframes cert-shine {
+  from { transform: translateX(0) rotate(12deg); }
+  to   { transform: translateX(450%) rotate(12deg); }
+}
+@keyframes cert-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.js-reveal [data-reveal]:not(.is-visible),
+  html.js-reveal [data-reveal-stagger]:not(.is-visible) > * {
+    opacity: 1;
+  }
+  html.js-reveal .cert-divider:not(.is-visible) {
+    transform: none;
+  }
+  [data-reveal].is-visible,
+  [data-reveal-stagger].is-visible > *,
+  .is-visible [data-reveal-line],
+  [data-hero-zoom] {
+    animation: none;
+  }
+  .cert-divider {
+    transform: none;
+    transition: none;
+  }
+  .cert-card::after,
+  .cert-card .cert-logo {
+    animation: none !important;
+  }
+}
+
 .hero-overlay {
   background: linear-gradient(
     90deg,
@@ -9,6 +320,17 @@ html {
     rgba(255, 255, 255, 0.7) 40%,
     rgba(255, 255, 255, 0) 100%
   );
+}
+/* En móvil el texto ocupa todo el ancho y queda sobre la foto: velo parejo. */
+@media (max-width: 767px) {
+  .hero-overlay {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.92) 0%,
+      rgba(255, 255, 255, 0.82) 70%,
+      rgba(255, 255, 255, 0.55) 100%
+    );
+  }
 }
 .dark .hero-overlay {
   background: linear-gradient(
@@ -28,4 +350,64 @@ html {
 .dark .map-bg {
   opacity: 0.1;
   filter: invert(1);
+}
+
+/* Tarjetas de "Nuestros Valores" en celulares: "Empoderamiento" no cabía en
+   anchos menores a ~408 px y se salía de la tarjeta. Menos separación y
+   relleno (y, en los más angostos, letra un poco más chica) para que cada
+   palabra quepa completa. */
+@media (max-width: 419px) {
+  [data-reveal-stagger].grid-cols-2.sm\:grid-cols-3 {
+    gap: 0.75rem;
+  }
+  [data-reveal-stagger].grid-cols-2.sm\:grid-cols-3 > div {
+    padding: 1.25rem 0.75rem;
+  }
+}
+@media (max-width: 359px) {
+  [data-reveal-stagger].grid-cols-2.sm\:grid-cols-3 > div > h3 {
+    font-size: 0.75rem;
+  }
+}
+
+/* El botón del chat (fijo abajo a la derecha, ~104 px de alto con su
+   margen) tapaba los enlaces legales al final de la página: el footer deja
+   ese espacio libre abajo. */
+footer.bg-brand-dark {
+  padding-bottom: 8rem;
+}
+
+/* --- Aviso de privacidad en modal (ver aviso-privacidad.js) ------------ */
+.aviso-dialogo {
+  width: min(56rem, calc(100vw - 2rem));
+  max-height: min(44rem, calc(100dvh - 2rem));
+  margin: auto;
+  border: 0;
+  overflow: hidden;
+}
+.aviso-dialogo[open] {
+  display: flex;
+  flex-direction: column;
+  animation: aviso-entra 0.3s var(--motion-ease-out) both;
+}
+.aviso-dialogo .aviso-cuerpo {
+  min-height: 0;
+  flex: 1 1 auto;
+  overscroll-behavior: contain;
+}
+.aviso-dialogo::backdrop {
+  background: rgba(0, 11, 77, 0.55);
+  backdrop-filter: blur(2px);
+}
+/* La página de atrás no se desplaza mientras el aviso está abierto. */
+html:has(.aviso-dialogo[open]) {
+  overflow: hidden;
+}
+@keyframes aviso-entra {
+  from { opacity: 0; translate: 0 12px; scale: 0.98; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .aviso-dialogo[open] {
+    animation: none;
+  }
 }

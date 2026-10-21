@@ -1,19 +1,19 @@
 <section class="py-20 relative bg-background-light dark:bg-background-dark overflow-hidden">
   <div class="absolute inset-0 z-0 map-bg pointer-events-none"></div>
   <div class="container mx-auto px-4 lg:px-8 relative z-10">
-    <div class="text-center mb-16">
+    <div class="text-center mb-16" data-reveal>
       <div class="flex items-center justify-center gap-4">
-        <div class="h-1 w-8 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
+        <div data-reveal-line class="h-1 w-8 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
         <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
           Conoce Nuestros <span class="text-primary">Planteles</span>
         </h2>
-        <div class="h-1 w-8 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
+        <div data-reveal-line class="h-1 w-8 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
       </div>
       <p class="mt-4 text-secondary-text-light dark:text-secondary-text-dark text-lg max-w-2xl mx-auto">
         Encuentra el campus más cercano a ti y comienza tu camino hacia el éxito.
       </p>
     </div>
 
-    <div id="planteles-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10"></div>
+    <div id="planteles-grid" data-reveal-stagger class="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10"></div>
   </div>
 </section>

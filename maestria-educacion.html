@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Maestría en Educación - Instituto Fleming</title>
 
+    <!-- Íconos del sitio (pestaña, iPhone/iPad, Android) -->
+    <link rel="icon" href="favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png" />
+    <link rel="manifest" href="site.webmanifest" />
+
     <!-- Tailwind CDN (debe cargarse desde el inicio, NO vía fetch) -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
 
@@ -16,45 +21,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@n8n/chat@1.40.1/dist/style.css" rel="stylesheet" />
 
-    <!-- Tailwind config -->
-    <script>
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            colors: {
-              primary: "#8C1515",
-              "primary-hover": "#6e1010",
-              secondary: "#3277AE",
-              "brand-dark": "#002147",
-              "background-light": "#F9FAFB",
-              "background-dark": "#111827",
-              "surface-light": "#FFFFFF",
-              "surface-dark": "#1F2937",
-              "text-light": "#1F2937",
-              "text-dark": "#F3F4F6",
-              "secondary-text-light": "#4B5563",
-              "secondary-text-dark": "#9CA3AF",
-            },
-            fontFamily: {
-              display: ["Montserrat", "sans-serif"],
-              body: ["Montserrat", "sans-serif"],
-            },
-            borderRadius: {
-              DEFAULT: "0.5rem",
-              xl: "1rem",
-              "2xl": "1.5rem",
-            },
-            boxShadow: {
-              soft: "0 4px 20px -2px rgba(0, 0, 0, 0.1)",
-              glow: "0 0 15px rgba(140, 21, 21, 0.3)",
-            },
-          },
-        },
-      };
-    </script>
+    <!-- Tema compartido (colores, tipografía) -->
+    <script src="assets/js/tailwind-config.js"></script>
 
     <!-- Tu CSS custom -->
     <link rel="stylesheet" href="assets/css/styles.css" />

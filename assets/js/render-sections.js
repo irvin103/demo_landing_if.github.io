@@ -567,7 +567,7 @@ export async function renderOferta() {
   });
 }
 
-// --- Helpers genéricos de modal (compartidos por oferta y directivos) ---
+// --- Helpers genéricos de modal --------------------------------------
 
 function openModal(modal) {
   if (!modal) return;
@@ -640,6 +640,8 @@ function bindOfertaModal() {
 
       const url = new URL(ctaLink.href, location.href);
       history.pushState(null, "", url.pathname + url.search + url.hash);
+      // pushState no dispara eventos: avisa al formulario del nuevo programa.
+      window.dispatchEvent(new Event("leadform:programa"));
 
       document.getElementById("lead-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
@@ -766,91 +768,6 @@ async function openOfertaDetalle(level) {
   }
 }
 
-// --- Directivos (equipo directivo) ---------------------------------------
-
-// Ajusta qué parte de cada foto de directivo se muestra dentro del círculo
-// (aplica tanto a la tarjeta como al modal). Formato CSS object-position:
-// "horizontal% vertical%" — 0% = izquierda/arriba, 100% = derecha/abajo,
-// 50% 50% = centrado (el valor por defecto de object-cover). Bajar el
-// segundo número sube el encuadre, útil para que no corte la cabeza.
-const DIRECTIVO_PHOTO_POSITION = "0% 0%";
-
-let directivosData = [];
-
-export async function renderDirectivos() {
-  const grid = document.getElementById("directivos-grid");
-  if (!grid) return;
-
-  bindModalDismiss("directivo-modal");
-
-  const data = await fetchJSON("data/directivos.json");
-  directivosData = data.directivos || [];
-
-  grid.innerHTML = directivosData.map((d, i) => {
-    const name = escapeHTML(d.name || "");
-    const title = escapeHTML(d.title || "");
-    return `
-      <button type="button" data-directivo-index="${i}" class="group bg-background-light dark:bg-gray-800 rounded-2xl overflow-hidden shadow-soft hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 text-center p-6 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
-        ${renderMediaPlaceholder({
-          src: d.photo,
-          alt: d.name,
-          label: d.name,
-          containerClass: "w-24 h-24 mx-auto mb-4 rounded-full",
-          imgClass: "group-hover:scale-110 transition-transform duration-500",
-          imgStyle: `object-position: ${DIRECTIVO_PHOTO_POSITION};`,
-        })}
-        <h3 class="font-bold text-gray-900 dark:text-white">${name}</h3>
-        <p class="text-sm text-secondary-text-light dark:text-secondary-text-dark mt-1">${title}</p>
-      </button>
-    `;
-  }).join("");
-
-  grid.querySelectorAll("[data-directivo-index]").forEach((el) => {
-    el.addEventListener("click", () => openDirectivoModal(Number(el.dataset.directivoIndex)));
-  });
-}
-
-function renderDirectivoModalBody(directivo) {
-  const name = escapeHTML(directivo.name || "");
-  const title = escapeHTML(directivo.title || "");
-  const bio = (directivo.bio || "").trim();
-
-  const bioBlock = bio
-    ? `<p class="text-sm text-secondary-text-light dark:text-secondary-text-dark leading-relaxed">${escapeHTML(bio)}</p>`
-    : `<div class="flex items-center gap-3 bg-gray-50 dark:bg-gray-800/60 border border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-4">
-        <span class="material-icons text-gray-400">hourglass_top</span>
-        <p class="text-sm text-gray-400 dark:text-gray-500 italic">Semblanza próximamente.</p>
-      </div>`;
-
-  return `
-    ${renderMediaPlaceholder({
-      src: directivo.photo,
-      alt: directivo.name,
-      label: directivo.name,
-      containerClass: "w-28 h-28 mx-auto mb-5 rounded-full",
-      initialsClass: "text-3xl",
-      imgStyle: `object-position: ${DIRECTIVO_PHOTO_POSITION};`,
-    })}
-    <div class="text-center mb-5">
-      <h4 class="text-lg font-bold text-gray-900 dark:text-white">${name}</h4>
-      <p class="text-sm text-primary font-semibold mt-0.5">${title}</p>
-    </div>
-    ${bioBlock}
-  `;
-}
-
-function openDirectivoModal(index) {
-  const directivo = directivosData[index];
-  const modal = document.getElementById("directivo-modal");
-  const titleEl = document.getElementById("directivo-modal-title");
-  const bodyEl = document.getElementById("directivo-modal-body");
-  if (!directivo || !modal || !titleEl || !bodyEl) return;
-
-  titleEl.textContent = directivo.name || "Directivo";
-  bodyEl.innerHTML = renderDirectivoModalBody(directivo);
-  openModal(modal);
-}
-
 export async function renderPlanteles() {
   const grid = document.getElementById("planteles-grid");
   if (!grid) return;
@@ -893,8 +810,8 @@ export async function renderPromos() {
     const title = safeTitleWithBr(p.title || "");
     const href = escapeHTML(p.href || "#");
     const icon = escapeHTML(p.icon || "star");
-    const bg = escapeHTML(p.bg || "#002147");
-    const hoverBg = escapeHTML(p.hoverBg || "#003366");
+    const bg = escapeHTML(p.bg || "#000B4D");
+    const hoverBg = escapeHTML(p.hoverBg || "#001590");
 
     return `
       <a class="promo-card group relative overflow-hidden rounded-md shadow-sm transition-all duration-300 hover:shadow-md h-16 flex items-center justify-start px-4"

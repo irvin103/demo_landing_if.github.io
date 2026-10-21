@@ -4,22 +4,22 @@
       "title": "Ven y celebra con nosotros<br/>nuestro 45° aniversario",
       "href": "#",
       "icon": "celebration",
-      "bg": "#002147",
-      "hoverBg": "#003366"
+      "bg": "#000B4D",
+      "hoverBg": "#001590"
     },
     {
       "title": "Pregunta por nuestro<br/>sistema de becas",
       "href": "#",
       "icon": "school",
-      "bg": "#3277AE",
-      "hoverBg": "#256396"
+      "bg": "#2C4FC7",
+      "hoverBg": "#2440A8"
     },
     {
       "title": "Curso de gastronomía<br/>en 6 meses",
       "href": "#",
       "icon": "restaurant_menu",
-      "bg": "#002147",
-      "hoverBg": "#003366"
+      "bg": "#000B4D",
+      "hoverBg": "#001590"
     }
   ]
 }
